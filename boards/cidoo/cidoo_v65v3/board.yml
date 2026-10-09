@@ -1,0 +1,7 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+board:
+  name: cidoo_v65v3
+  full_name: CIDOO V65 V3
+  vendor: cidoo
+  socs:
+    - name: tlsr8278

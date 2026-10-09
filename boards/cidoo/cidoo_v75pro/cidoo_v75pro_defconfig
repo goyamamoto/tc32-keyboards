@@ -1,0 +1,82 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+CONFIG_LLVM_USE_LLD=y
+# The low SRAM the RAM code, the cache tags and the cache's 2 KB take (now
+# 0x1600 + 0x900); the rest of the 32 KB (cidoo_v75pro.dts) is RAM. The linker
+# fails if the RAM code outgrows it.
+CONFIG_TC32_BOOT_MIRROR_SIZE=0x2800
+CONFIG_GPIO=y
+
+# Knob
+CONFIG_EC11=y
+CONFIG_EC11_TRIGGER_GLOBAL_THREAD=y
+
+# USB through the TLSR8278 usb_dc driver (built, not yet run on hardware).
+# No Bluetooth for the TLSR8278 yet.
+CONFIG_ZMK_USB=y
+CONFIG_ZMK_BLE=n
+
+# The image polls the USB controller only; the behaviour of the USB interrupt
+# lines is not documented and not measured on hardware. Turn on once measured.
+CONFIG_USB_DC_TELINK_B87_IRQ_LINES=n
+# The 1 ms poll from Timer1's interrupt, not from a kernel timer (src/usb_poll_timer.c).
+CONFIG_TLSR_USB_POLL_TIMER=y
+
+# The Timer2 watchdog from the first instructions of the SoC setup, with the
+# boot guard's period; the guard takes it over at POST_KERNEL.
+CONFIG_SOC_TLSR8278_EARLY_WATCHDOG_MS=4000
+
+# The runtime's 64-bit division bit by bit (zephyr-tc32's TC32_FAST_DIV64 off): the time
+# conversions divide by constants through a multiply, so no 64-bit division runs on the
+# key, USB or link paths, and the bit-serial one is about 500 bytes less code in a slot
+# the Studio build all but fills.
+CONFIG_TC32_FAST_DIV64=n
+
+# Flash access for the USB OTA receiver (tc32/src/tlsr_usb_ota.c).
+CONFIG_FLASH=y
+
+# ZMK's matrix driver schedules scans with K_TIMEOUT_ABS_MS, which needs 64-bit
+# timeouts. The TLSR827x SoC default turns them off to save cycles per tick.
+CONFIG_TIMEOUT_64BIT=y
+
+# The flash supply trim (analog 0x09, 0x0c, not documented) is set once at boot
+# (tlsr_spi_flash_trim_calib(), tc32/src/tlsr_spi_flash.c), which changes
+# nothing unless the calibration bytes at 0x771c0 hold a value or the flash is
+# Zbit, and raised at OTA start on a Zbit flash. No other driver trims
+# the supply (the flash node uses telink,tlsr-spi-flash).
+
+# The configuration descriptor: remote wakeup (a key wakes the host from
+# sleep, src/usb_suspend.c), bus-powered (Zephyr's default is self-powered,
+# 0xe0; here 0xa0) and 500 mA.
+CONFIG_USB_DEVICE_REMOTE_WAKEUP=y
+CONFIG_USB_SELF_POWERED=n
+CONFIG_USB_MAX_POWER=250
+
+# Key events go from the matrix scan to the keymap through a queue whose put
+# never waits (physical_layouts.c, k_msgq_put(K_NO_WAIT)); the scan and the
+# consumer share the system work queue, so a scan pass with more state changes
+# than the queue holds drops the rest, and a dropped release leaves a key held.
+# ZMK's default is 4; five keys pressed or released in one pass already exceed
+# it. 32 leaves room.
+CONFIG_ZMK_KSCAN_EVENT_QUEUE_SIZE=32
+
+# No switchable external power rail on this board: &ext_power would do nothing.
+CONFIG_ZMK_EXT_POWER=n
+
+# Code left out that the keyboard does not use: the rotation of the physical layout's keys (no key
+# is rotated; Studio's messages leave the zero fields out either way), time slices (no two
+# preemptible threads share a priority) and the kernel's heap (no k_heap).
+CONFIG_ZMK_PHYSICAL_LAYOUT_KEY_ROTATION=n
+CONFIG_TIMESLICING=n
+CONFIG_KERNEL_MEM_POOL=n
+
+# Identical code folding in the link, safe form: functions whose address nothing compares are
+# kept once. The units of the boot guard's early stage are compiled without the
+# address-significance table, so nothing they define or call is folded.
+CONFIG_TC32_ICF_SAFE=y
+
+# The host's keyboard LED output report (USB SET_REPORT, the BLE output report, the 2.4G
+# dongle's ACKs) kept per endpoint (ZMK's HID indicators); the report maps declare it. With
+# the backlight (CONFIG_LED_DRIVER_SPI) the Caps Lock key's LED shows Caps Lock
+# (led_driver_table.h, BL_HOST_LED).
+CONFIG_ZMK_HID_INDICATORS=y

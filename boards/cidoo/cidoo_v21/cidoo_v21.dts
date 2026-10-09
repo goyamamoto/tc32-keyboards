@@ -1,0 +1,264 @@
+/*
+ * CIDOO V21 (Telink TLSR8278), a numpad with a knob.
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+/dts-v1/;
+
+#include <telink/tlsr8278.dtsi>
+#include <zephyr/dt-bindings/gpio/gpio.h>
+#include "cidoo_v21-layouts.dtsi"
+
+/ {
+	model = "CIDOO V21";
+	compatible = "cidoo,v21";
+
+	chosen {
+		zephyr,sram = &sram0;
+		zephyr,flash = &flash;
+		zephyr,code-partition = &code_partition;
+		zmk,kscan = &kscan0;
+		zmk,physical-layout = &v21_layout;
+	};
+
+	/*
+	 * The matrix columns also switch the backlight's LED columns (a PNP
+	 * each, lit while the column is low), and PWM0-PWM5 drive the two rows'
+	 * red, green and blue lines, so one driver does both
+	 * (src/led_key_matrix.c): 12 column slots of 500 us, the key scan in
+	 * the 13th. For the scan each column is driven HIGH in turn (the others
+	 * low); rows read HIGH with 100 kOhm pull-downs (afe_0x12, DS-TLSR8278
+	 * Table 7-5). Keys sit on rows 0 and 1 only; the knob is not in the
+	 * matrix.
+	 */
+	kscan0: kscan {
+		compatible = "cidoo,led-key-matrix";
+
+		/* PWM0-PWM2 on PA2-PA4 (pad function 2), PWM3-PWM5 on PB0-PB2 (0). */
+		pwm-gpios
+			= <&gpioa 2 GPIO_ACTIVE_HIGH>
+			, <&gpioa 3 GPIO_ACTIVE_HIGH>
+			, <&gpioa 4 GPIO_ACTIVE_HIGH>
+			, <&gpiob 0 GPIO_ACTIVE_HIGH>
+			, <&gpiob 1 GPIO_ACTIVE_HIGH>
+			, <&gpiob 2 GPIO_ACTIVE_HIGH>
+			;
+		pwm-mux = <2 2 2 0 0 0>;
+		/* Row 0: red PWM0, green PWM2, blue PWM1; row 1: red PWM3, green PWM5, blue PWM4. */
+		rgb-channels = <0 2 1 3 5 4>;
+
+		col-gpios
+			= <&gpiob 4 GPIO_ACTIVE_HIGH>
+			, <&gpiob 5 GPIO_ACTIVE_HIGH>
+			, <&gpiob 7 GPIO_ACTIVE_HIGH>
+			, <&gpioc 0 GPIO_ACTIVE_HIGH>
+			, <&gpioa 7 GPIO_ACTIVE_HIGH>
+			, <&gpioa 1 GPIO_ACTIVE_HIGH>
+			, <&gpioa 0 GPIO_ACTIVE_HIGH>
+			, <&gpiod 5 GPIO_ACTIVE_HIGH>
+			, <&gpiod 4 GPIO_ACTIVE_HIGH>
+			, <&gpiod 3 GPIO_ACTIVE_HIGH>
+			, <&gpiod 2 GPIO_ACTIVE_HIGH>
+			, <&gpioc 5 GPIO_ACTIVE_HIGH>
+			;
+
+		row-gpios
+			= <&gpioc 2 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
+			, <&gpioc 1 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
+			;
+	};
+
+	/*
+	 * Pixel n is the LED at matrix position n (row * 12 + column). Pixels
+	 * 0 to 22 are driven, including 0,11 and 1,9 under the upper half of
+	 * Enter and the lower half of +, where whether LEDs sit is not known;
+	 * not 1,11 (the knob press).
+	 */
+	backlight: backlight {
+		compatible = "cidoo,led-key-matrix-backlight";
+		chain-length = <24>;
+		led-pixels = [00 01 02 03 04 05 06 07 08 09 0a 0b
+			      0c 0d 0e 0f 10 11 12 13 14 15 16 ff];
+	};
+
+	/*
+	 * The effects (tc32/src/led_key_matrix_effects.c). The grid's rows: the knob's
+	 * corner, Fn, Tab, Bspc; Num / * -; 7 8 9 +; 4 5 6 +; 1 2 3 Enter;
+	 * 0 . Enter. The rings around 8: 8; Num / * 7 9 4 5 6; the top row, -,
+	 * + and 1 2 3 Enter; 0 . Enter. The host's Num Lock: the Num key (1,0)
+	 * white.
+	 */
+	backlight_effects {
+		compatible = "zmk,backlight-effects";
+		led-strip = <&backlight>;
+		num-lock-pixel = <12>;
+		grid = [00 01 02 03  0c 0d 0e 0f  04 05 06 07
+			10 11 12 15  08 09 0a 0b  13 ff 14 16];
+		rings = [05 ff ff ff ff ff ff ff ff ff ff ff
+			 10 04 0c 0d 0e 06 12 11 ff ff ff ff
+			 00 03 0f 07 15 0b 0a 09 08 01 02 ff
+			 13 14 16 ff ff ff ff ff ff ff ff ff];
+	};
+
+	/*
+	 * Knob turns on PD0 and PC3, counted per detent as on the V75 Pro. PD0
+	 * leaving the detent first is up (Volume Up), PC3 first is down; the
+	 * driver counts a-first as up. GPIO_PULL_UP is the chip's 10 kOhm pull-up.
+	 */
+	encoder: encoder {
+		compatible = "cidoo,detent-encoder";
+		a-gpios = <&gpiod 0 (GPIO_ACTIVE_HIGH | GPIO_PULL_UP)>;
+		b-gpios = <&gpioc 3 (GPIO_ACTIVE_HIGH | GPIO_PULL_UP)>;
+		steps = <80>;
+		status = "okay";
+	};
+
+	/* The mode switch: PC4 low is BT, PB6 low 2.4G. */
+	mode_switch: mode-switch {
+		compatible = "cidoo,mode-switch";
+		ble-gpios = <&gpioc 4 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+		rf24-gpios = <&gpiob 6 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+	};
+
+	/* The battery measurement and the charger pins. */
+	battery {
+		compatible = "cidoo,battery";
+		adc-input = <4>; /* B3P: PB3 */
+		full-millivolt = <2823>;
+		empty-millivolt = <2109>;
+		power-gpios = <&gpiod 7 GPIO_ACTIVE_HIGH>;
+		charging-gpios = <&gpiod 6 (GPIO_ACTIVE_HIGH | GPIO_PULL_UP)>;
+	};
+
+	sensors: sensors {
+		compatible = "zmk,keymap-sensors";
+		sensors = <&encoder>;
+		triggers-per-rotation = <40>;
+	};
+};
+
+/*
+ * 32 KB of SRAM (0x840000-0x847fff), not the TLSR8278's 64 KB: SRAM above
+ * 0x848000 is not known to be present on these keyboards.
+ */
+&sram0 {
+	reg = <0x00840000 0x00008000>;
+};
+
+&gpioa {
+	status = "okay";
+};
+
+&gpiob {
+	status = "okay";
+};
+
+&gpioc {
+	status = "okay";
+};
+
+&gpiod {
+	status = "okay";
+};
+
+/ {
+	behaviors {
+		/*
+		 * Released after 15 s held: boot the image in the other slot (the
+		 * original firmware after the first install). Long, so that a finger
+		 * slipping onto KP0 while Fn + KP1 is held 3 s for a pairing does not
+		 * leave ZMK; shorter than the 20 s after which the BT position's
+		 * advertising to a bonded host ends in deep sleep.
+		 */
+		prev_fw: prev_firmware {
+			compatible = "zmk,behavior-prev-firmware";
+			#binding-cells = <0>;
+			hold-ms = <15000>;
+		};
+
+		/* ZMK's RGB commands for the backlight effects (&bl RGB_TOG, ...). */
+		bl: backlight {
+			compatible = "zmk,behavior-backlight-rgb";
+			#binding-cells = <2>;
+		};
+	};
+};
+
+&usbd {
+	status = "okay";
+};
+
+&flash {
+	/* Every flash transaction goes through tc32/src/flash_tlsr_spi.c. */
+	compatible = "telink,tlsr-spi-flash";
+	/*
+	 * 512 KB, the map the original firmware in the other slot also uses, until
+	 * a unit's flash ID shows more: the driver then refuses any address from
+	 * 0x80000, which on a 512 KB part would alias slot A.
+	 */
+	reg = <0x00000000 0x00080000>;
+
+	partitions {
+		compatible = "fixed-partitions";
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		/*
+		 * The V75 Pro's layout. Everything stays below 0x80000 (on a
+		 * 512 KB part addresses from 0x80000 alias the bottom). Firmware
+		 * slots at 0x00000 and 0x20000 (128 KB each; the image is linked
+		 * for 0 and the boot ROM maps either slot there).
+		 */
+		code_partition: partition@0 {
+			label = "slot-a";
+			reg = <0x00000000 0x00020000>;
+		};
+
+		slot_b_partition: partition@20000 {
+			label = "slot-b";
+			reg = <0x00020000 0x00020000>;
+		};
+
+		/*
+		 * This firmware's own data: the bond log (0x60000-0x61fff, with
+		 * TLSR_BOND_LOG: the BLE bonds, and the confirm's flash test), the
+		 * backlight settings (0x62000) and the 2.4G link's
+		 * records (0x63000, with TLSR_P24). The original firmware in the other
+		 * slot does not write here: it writes 0x40000-0x56fff and 0x76000.
+		 */
+		storage_partition: partition@60000 {
+			label = "storage";
+			reg = <0x00060000 0x00008000>;
+		};
+
+		/*
+		 * Boot guard reset counter (0x68000) and revert journal
+		 * (0x69000-0x6afff): CONFIG_TLSR_BOOT_GUARD_OFFSET and
+		 * CONFIG_TLSR_SLOTS_JOURNAL_OFFSET.
+		 */
+		guard_partition: partition@68000 {
+			label = "tlsr-guard";
+			reg = <0x00068000 0x00003000>;
+		};
+
+		/*
+		 * tc32_rng's seed record log (0x6b000-0x6cfff, two sectors
+		 * apart from the boot guard's, TLSR_RNG_STORE).
+		 */
+		rng_seed_partition: partition@6b000 {
+			label = "rng-seed";
+			reg = <0x0006b000 0x00002000>;
+		};
+	};
+};
+
+/* The random bit generator, read by tc32_rng only. */
+&rbg {
+	status = "okay";
+};
+
+/* The public key engine, for P-256 (tc32_p256.h). */
+&pke {
+	status = "okay";
+};

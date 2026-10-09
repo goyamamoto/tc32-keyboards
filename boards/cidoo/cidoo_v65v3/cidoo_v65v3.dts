@@ -1,0 +1,258 @@
+/*
+ * CIDOO V65 V3 (Telink TLSR8278), 65% ANSI with a knob: the V75 Pro's board
+ * (the same matrix pins, knob pins, LED drivers and flash layout) without the
+ * mode switch.
+ *
+ * The pins are not yet checked on hardware.
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+/dts-v1/;
+
+#include <telink/tlsr8278.dtsi>
+#include <zephyr/dt-bindings/gpio/gpio.h>
+#include "cidoo_v65v3-layouts.dtsi"
+
+/ {
+	model = "CIDOO V65 V3";
+	compatible = "cidoo,v65v3";
+
+	chosen {
+		zephyr,sram = &sram0;
+		zephyr,flash = &flash;
+		zephyr,code-partition = &code_partition;
+		zmk,kscan = &kscan0;
+		zmk,physical-layout = &v65v3_layout;
+	};
+
+	/*
+	 * Columns are driven LOW one at a time; rows read LOW with pull-ups.
+	 * Columns 5-9 double as the RGB driver
+	 * SPI lines (PA4/PA3/PA2) and chip selects (PA1, PD5).
+	 */
+	kscan0: kscan {
+		compatible = "zmk,kscan-gpio-matrix";
+		diode-direction = "col2row";
+		/*
+		 * While a key is down or debouncing, scan every 3 ms, not 1 ms: one
+		 * scan of the 90 positions takes about 20,000 instructions on the
+		 * TC32, so a 1 ms scan kept the CPU over half busy while a key was
+		 * held (tc32emu, 1 cycle per instruction, on the V75 Pro's matrix,
+		 * which this one is).
+		 */
+		debounce-scan-period-ms = <3>;
+		/*
+		 * With every key released the driver only looks whether any row
+		 * answers a column, a fraction of a scan's instructions: a press is
+		 * seen 0-5 ms after it is made. Each look is a wake-up of the system
+		 * work queue, whose code does not fit the 2 KB flash cache, so the
+		 * looks are 5 ms apart and no closer: at 190 cycles per cache miss
+		 * (tc32emu) the idle keyboard is 29 % busy over USB, 3 % more than
+		 * with a scan every 10 ms in the look's place.
+		 */
+		poll-period-ms = <5>;
+		/*
+		 * A press counts at the second scan that sees it, which comes 1 ms
+		 * after the first (later when the first took longer than that): one
+		 * more scan for each press. A release counts once the scans that see
+		 * it have counted 5 ms, the first of them a scan period: at the third,
+		 * 6 ms after the first, or sooner when another key's first pressed
+		 * reading brings a scan forward.
+		 */
+		debounce-press-ms = <1>;
+		debounce-press-scan-period-ms = <1>;
+
+		col-gpios
+			= <&gpiob 5 GPIO_ACTIVE_LOW>
+			, <&gpiob 4 GPIO_ACTIVE_LOW>
+			, <&gpiob 2 GPIO_ACTIVE_LOW>
+			, <&gpiob 1 GPIO_ACTIVE_LOW>
+			, <&gpiob 0 GPIO_ACTIVE_LOW>
+			, <&gpioa 4 GPIO_ACTIVE_LOW>
+			, <&gpioa 3 GPIO_ACTIVE_LOW>
+			, <&gpioa 2 GPIO_ACTIVE_LOW>
+			, <&gpioa 1 GPIO_ACTIVE_LOW>
+			, <&gpiod 5 GPIO_ACTIVE_LOW>
+			, <&gpiod 4 GPIO_ACTIVE_LOW>
+			, <&gpiod 2 GPIO_ACTIVE_LOW>
+			, <&gpiod 1 GPIO_ACTIVE_LOW>
+			, <&gpiod 0 GPIO_ACTIVE_LOW>
+			, <&gpioc 7 GPIO_ACTIVE_LOW>
+			;
+
+		row-gpios
+			= <&gpioc 5 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>
+			, <&gpioc 4 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>
+			, <&gpioc 3 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>
+			, <&gpioc 2 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>
+			, <&gpioc 1 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>
+			, <&gpioc 0 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>
+			;
+	};
+
+	/* Knob turns on PC6 and PB7: one step per detent move (two pin
+	 * changes), PC6 changing first is volume up. The driver reports two
+	 * pulses per move, so steps = 2 x triggers-per-rotation gives one
+	 * trigger per move; the knob's detents per rotation are not known and
+	 * do not matter for that. */
+	encoder: encoder {
+		compatible = "cidoo,detent-encoder";
+		a-gpios = <&gpioc 6 (GPIO_ACTIVE_HIGH | GPIO_PULL_UP)>;
+		b-gpios = <&gpiob 7 (GPIO_ACTIVE_HIGH | GPIO_PULL_UP)>;
+		steps = <80>;
+		status = "okay";
+	};
+
+	/*
+	 * No mode switch: the board's power switch chooses between the cable
+	 * and the battery, and the firmware reads it as the cable's power on
+	 * PD7 (the battery node's power-in pin): power in is the wired mode,
+	 * none the wireless link the BLE build keeps with its profiles. PA0
+	 * and PB6, the V75 Pro's switch inputs, are unused pads here (board.c).
+	 */
+
+	/*
+	 * The battery level: the ADC on PB3 against ground, 2109 mV as 0 % and 2823 mV as
+	 * 100 %. PD7 high is power in (with it, PD6 low is a full battery, PD6 high
+	 * charging); PD6 has a 10 kOhm pull-up, PD7 no pull.
+	 */
+	battery {
+		compatible = "cidoo,battery";
+		adc-input = <4>; /* B3P: PB3 */
+		full-millivolt = <2823>;
+		empty-millivolt = <2109>;
+		power-gpios = <&gpiod 7 GPIO_ACTIVE_HIGH>;
+		charging-gpios = <&gpiod 6 (GPIO_ACTIVE_HIGH | GPIO_PULL_UP)>;
+	};
+
+	sensors: sensors {
+		compatible = "zmk,keymap-sensors";
+		sensors = <&encoder>;
+		triggers-per-rotation = <40>;
+	};
+};
+
+&gpioa {
+	status = "okay";
+};
+
+&gpiob {
+	status = "okay";
+};
+
+&gpioc {
+	status = "okay";
+};
+
+&gpiod {
+	status = "okay";
+
+	/*
+	 * PD3 is taken as the active-low SDB (shutdown) pin of the
+	 * SLED1735-style RGB drivers. Keep it low so the drivers stay shut down
+	 * while their SPI and chip select lines toggle as matrix columns, until the
+	 * backlight (LED_DRIVER_SPI, src/led_driver_spi.c) drives it.
+	 */
+	rgb_sdb {
+		gpio-hog;
+		gpios = <3 GPIO_ACTIVE_HIGH>;
+		output-low;
+		line-name = "rgb-sdb";
+	};
+};
+
+/ {
+	behaviors {
+		/* Held 3 s: boot the image in the other slot (the original firmware after the first install). */
+		prev_fw: prev_firmware {
+			compatible = "zmk,behavior-prev-firmware";
+			#binding-cells = <0>;
+			hold-ms = <3000>;
+			display-name = "Previous Firmware";
+		};
+	};
+};
+
+&usbd {
+	status = "okay";
+};
+
+/*
+ * 32 KB of SRAM (0x840000-0x847fff), not the TLSR8278's 64 KB. The chip's
+ * marking is not seen, so nothing shows that the SRAM above 0x848000 exists;
+ * this image stays below it, and the linker enforces it.
+ */
+&sram0 {
+	reg = <0x00840000 0x00008000>;
+};
+
+&flash {
+	/* Every flash transaction goes through tc32/src/flash_tlsr_spi.c. */
+	compatible = "telink,tlsr-spi-flash";
+	/*
+	 * 512 KB (a unit's JEDEC capacity byte; 0x771c0: the two bytes
+	 * tlsr_spi_flash_trim_calib() reads at boot for the flash supply trims),
+	 * as on the V21 and the V75 Pro: the driver refuses any address from
+	 * 0x80000, which on a 512 KB part would alias slot A.
+	 */
+	reg = <0x00000000 0x00080000>;
+
+	partitions {
+		compatible = "fixed-partitions";
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		/*
+		 * Two firmware slots at 0x00000 and 0x20000 (128 KB each; the
+		 * image is linked for 0 and the boot ROM maps either slot there).
+		 * Data of the keyboard's original firmware, left alone:
+		 * 0x40000-0x56fff, 0x74000-0x75fff, 0x76000-0x77fff and
+		 * 0x79000-0x7afff.
+		 */
+		code_partition: partition@0 {
+			label = "slot-a";
+			reg = <0x00000000 0x00020000>;
+		};
+
+		slot_b_partition: partition@20000 {
+			label = "slot-b";
+			reg = <0x00020000 0x00020000>;
+		};
+
+		/* Not written by the original firmware. */
+		storage_partition: partition@60000 {
+			label = "storage";
+			reg = <0x00060000 0x00008000>;
+		};
+
+		/*
+		 * Boot guard reset counter (0x68000) and revert journal
+		 * (0x69000-0x6afff): CONFIG_TLSR_BOOT_GUARD_OFFSET and
+		 * CONFIG_TLSR_SLOTS_JOURNAL_OFFSET.
+		 */
+		guard_partition: partition@68000 {
+			label = "tlsr-guard";
+			reg = <0x00068000 0x00003000>;
+		};
+
+		/*
+		 * tc32_rng's seed record log (0x6b000-0x6cfff, two sectors
+		 * apart from the boot guard's, TLSR_RNG_STORE).
+		 */
+		rng_seed_partition: partition@6b000 {
+			label = "rng-seed";
+			reg = <0x0006b000 0x00002000>;
+		};
+	};
+};
+
+/* The random bit generator, read by tc32_rng only. */
+&rbg {
+	status = "okay";
+};
+
+/* The public key engine, for P-256 (tc32_p256.h). */
+&pke {
+	status = "okay";
+};

@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+config STATUS_DISPLAY_CIDOO_V75PRO
+	bool
+	default y
+	depends on TLSR_STATUS_DISPLAY && LED_DRIVER_SPI && BOARD_CIDOO_V75PRO
+	help
+	  v75pro_status.c: the status display on the V75 Pro's LEDs
+	  through the backlight driver's overlay - the battery on the three
+	  LEDs left of the knob, the Bluetooth profiles on Q, W and E, the
+	  2.4G link on R, the CPU left over on 1 to 0.

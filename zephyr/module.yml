@@ -1,0 +1,6 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# tc32-keyboards as a Zephyr module: the board directories under boards/.
+name: tc32-keyboards
+build:
+  settings:
+    board_root: .

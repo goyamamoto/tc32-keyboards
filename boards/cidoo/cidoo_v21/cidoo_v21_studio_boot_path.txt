@@ -1,0 +1,3636 @@
+# boot_path_check.py's listing of the functions executed from reset until the boot is counted and the
+# power-on chord can take the keyboard back to the other slot (the boot guard's early stage;
+# tc32/boot_path_units.txt in zmk-tc32): instructions, branch targets and literals by symbol.
+# Written by: boot_path_check.py record OBJDUMP NM zmk.elf zmk.map FUNCTION...
+== __aeabi_memcpy8 6
+push {r7, lr}
+bl <ble_radio_give+end|memcpy+0x0>
+pop {r7}
+pop {r0}
+mov lr, r0
+bx lr
+== atomic_get 2
+ldr r0, [r0]
+bx lr
+== board_early_init_hook 7
+push {r7, lr}
+bl <tlsr_spi_flash_is_zbit+end|tlsr_spi_flash_trim_calib+0x0>
+bl <tlsr_boot_guard_early+0x0|tlsr_boot_guard_feed+end>
+pop {r7}
+pop {r0}
+mov lr, r0
+bx lr
+== check_image 106
+push {r4, r5, r6, r7, lr}
+sub sp, #0x64
+movs r4, r2
+movs r7, r1
+movs r5, r0
+movs r6, #0x4
+str r6, [sp]
+movs r2, #0x18
+add r3, sp, #0x24
+bl <own_crc+end|read_image+0x0>
+cmp r0, #0x0
+bne <check_image+0xd6>
+str r4, [sp, #0xc]
+str r6, [sp, #0x20]
+add r2, sp, #0x24
+ldrb r4, [r2]
+movs r3, #0xf
+ands r3, r4
+movs r1, #0x1
+mvns r0, r1
+cmp r3, #0x4
+bne <check_image+0xd6>
+str r5, [sp, #0x1c]
+ldrb r3, [r2, #0x3]
+lsls r3, r3, #0x18
+ldrb r5, [r2, #0x2]
+lsls r5, r5, #0x10
+adds r3, r5, r3
+ldrb r2, [r2, #0x1]
+lsls r2, r2, #0x8
+adds r2, r3, r2
+adds r2, r2, r4
+cmp r2, #0x24
+blo <check_image+0xd6>
+lsls r1, r1, #0x11
+cmp r2, r1
+bhi <check_image+0xd6>
+str r0, [sp, #0x4]
+str r7, [sp, #0x14]
+add r0, sp, #0x24
+adds r0, #0x8
+str r0, [sp, #0x8]
+subs r7, r2, #0x4
+movs r4, #0x0
+movs r0, #0x40
+str r0, [sp, #0x10]
+str r7, [sp, #0x18]
+movs r5, r4
+ldr r0, [sp, #0x18]
+cmp r5, r0
+ldr r0, [sp, #0x20]
+bhs <check_image+0xb0>
+cmp r7, #0x40
+mov r12, r7
+mov r6, r12
+blo <check_image+0x74>
+ldr r6, [sp, #0x10]
+lsls r0, r5, #0x14
+lsrs r0, r0, #0x1a
+bne <check_image+0x7e>
+bl <feeder+end|tlsr_boot_guard_feed+0x0>
+str r6, [sp]
+add r3, sp, #0x24
+ldr r0, [sp, #0x1c]
+ldr r1, [sp, #0x14]
+movs r2, r5
+bl <own_crc+end|read_image+0x0>
+cmp r0, #0x0
+bne <check_image+0xd6>
+cmp r5, #0x0
+bne <check_image+0x9e>
+movs r2, #0x4
+ldr r0, [sp, #0x8]
+ldr r1, [pc, POOL] =0x1c7c6 kat+end|knlt+0x0|str:4b4e4c54
+bl <ble_radio_give+end|memcpy+0x0>
+add r1, sp, #0x24
+movs r0, r4
+movs r2, r6
+bl <crc16_ccitt+end|crc32_ieee_update+0x0>
+movs r4, r0
+subs r7, #0x40
+adds r5, #0x40
+b <check_image+0x62>
+str r0, [sp]
+add r3, sp, #0x24
+ldr r0, [sp, #0x1c]
+ldr r1, [sp, #0x14]
+ldr r2, [sp, #0x18]
+bl <own_crc+end|read_image+0x0>
+cmp r0, #0x0
+bne <check_image+0xd6>
+ldr r2, [sp, #0x24]
+eors r4, r2
+adds r1, r4, #0x1
+ldr r0, [sp, #0x4]
+bne <check_image+0xd6>
+movs r0, #0x0
+ldr r1, [sp, #0xc]
+cmp r1, #0x0
+beq <check_image+0xd6>
+str r2, [r1]
+add sp, #0x64
+pop {r4, r5, r6, r7}
+pop {r1}
+mov lr, r1
+bx lr
+== chord_analog_read 12
+ldr r1, [pc, POOL] =0x8000b8
+strb r0, [r1]
+movs r0, #0x40
+strb r0, [r1, #0x2]
+ldrb r0, [r1, #0x2]
+lsls r0, r0, #0x1f
+bne <chord_analog_read+0x8>
+ldrb r0, [r1, #0x1]
+movs r2, #0x0
+strb r2, [r1, #0x2]
+bx lr
+mov r8, r8
+== chord_analog_write 12
+ldr r2, [pc, POOL] =0x8000b8
+strb r0, [r2]
+strb r1, [r2, #0x1]
+movs r0, #0x60
+strb r0, [r2, #0x2]
+ldrb r0, [r2, #0x2]
+lsls r0, r0, #0x1f
+bne <chord_analog_write+0xa>
+movs r0, #0x0
+strb r0, [r2, #0x2]
+bx lr
+mov r8, r8
+== chord_key_down 46
+push {r3, r4, r5, r6, r7, lr}
+movs r4, r1
+movs r5, r0
+ldrb r0, [r0, #0x4]
+movs r7, #0x1
+movs r6, r7
+lsls r6, r0
+ldr r0, [r5]
+ldrb r1, [r0, #0x3]
+bics r1, r6
+strb r1, [r0, #0x3]
+ldr r0, [r5]
+ldrb r1, [r0, #0x2]
+bics r1, r6
+strb r1, [r0, #0x2]
+movs r0, #0xa
+bl <tlsr_spi_flash_delay_us+0x0>
+ldr r0, [r5]
+ldrb r1, [r0, #0x2]
+orrs r1, r6
+strb r1, [r0, #0x2]
+ldrb r0, [r4, #0x4]
+movs r1, r7
+lsls r1, r0
+ldr r0, [r4]
+ldrb r2, [r0, #0x3]
+orrs r2, r1
+strb r2, [r0, #0x3]
+movs r0, #0x7d
+lsls r0, r0, #0x3
+bl <tlsr_spi_flash_delay_us+0x0>
+ldr r0, [r5]
+ldrb r0, [r0]
+ldrb r1, [r4, #0x4]
+lsls r7, r1
+ldr r1, [r4]
+ldrb r2, [r1, #0x3]
+bics r2, r7
+strb r2, [r1, #0x3]
+ands r0, r6
+subs r1, r0, #0x1
+sbcs r0, r1
+pop {r3, r4, r5, r6, r7}
+pop {r1}
+mov lr, r1
+bx lr
+== chord_pin_restore 10
+ldr r1, [r0]
+ldrb r2, [r0, #0x5]
+strb r2, [r1, #0x2]
+ldr r1, [r0]
+ldrb r2, [r0, #0x6]
+strb r2, [r1, #0x3]
+ldr r1, [r0]
+ldrb r0, [r0, #0x7]
+strb r0, [r1, #0x6]
+bx lr
+== chord_pin_save 8
+ldr r1, [r0]
+ldrb r2, [r1, #0x2]
+strb r2, [r0, #0x5]
+ldrb r2, [r1, #0x3]
+strb r2, [r0, #0x6]
+ldrb r1, [r1, #0x6]
+strb r1, [r0, #0x7]
+bx lr
+== chord_row_restore 20
+push {r4, lr}
+movs r4, r0
+ldrb r1, [r0, #0xb]
+ldrb r0, [r0, #0x9]
+cmp r0, #0x1
+bne <chord_row_restore+0x14>
+movs r0, #0xc0
+bl <chord_analog_read+end|chord_analog_write+0x0>
+b <chord_row_restore+0x18>
+ldr r0, [r4]
+strb r1, [r0, #0x1]
+ldrb r1, [r4, #0xa]
+ldrb r0, [r4, #0x8]
+bl <chord_analog_read+end|chord_analog_write+0x0>
+movs r0, r4
+bl <chord_key_down+end|chord_pin_restore+0x0>
+pop {r4}
+pop {r0}
+mov lr, r0
+bx lr
+== chord_row_setup 73
+push {r4, r5, r6, lr}
+movs r4, r0
+ldr r0, [r0]
+lsrs r1, r0, #0x3
+ldr r2, [pc, POOL] =0xffefff4e
+adds r1, r1, r2
+rsbs r2, r1, #0
+adcs r2, r1
+strb r2, [r4, #0x9]
+ldrb r6, [r4, #0x4]
+movs r5, #0x1
+cmp r6, #0x3
+mov r12, r5
+mov r1, r12
+bhi <chord_row_setup+0x20>
+movs r1, #0x0
+movs r2, #0x5
+lsls r2, r2, #0x7
+adds r0, r0, r2
+lsrs r0, r0, #0x2
+movs r2, #0xfe
+ands r2, r0
+adds r0, r2, r1
+adds r0, #0xe
+strb r0, [r4, #0x8]
+movs r0, r4
+bl <boot_guard_init+end|chord_pin_save+0x0>
+ldrb r0, [r4, #0x8]
+bl <chord_analog_read+0x0|chord_row_setup+end>
+strb r0, [r4, #0xa]
+lsls r5, r6
+ldrb r0, [r4, #0x9]
+cmp r0, #0x1
+bne <chord_row_setup+0x52>
+movs r0, #0xc0
+bl <chord_analog_read+0x0|chord_row_setup+end>
+ldr r1, [r4]
+b <chord_row_setup+0x56>
+ldr r1, [r4]
+ldrb r0, [r1, #0x1]
+strb r0, [r4, #0xb]
+ldrb r0, [r4, #0x7]
+orrs r0, r5
+strb r0, [r1, #0x6]
+ldrb r0, [r4, #0x4]
+lsls r0, r0, #0x1e
+lsrs r0, r0, #0x1d
+movs r2, #0x2
+lsls r2, r0
+movs r3, #0x3
+lsls r3, r0
+ldrb r1, [r4, #0xa]
+bics r1, r3
+orrs r1, r2
+movs r6, #0xff
+ands r1, r6
+ldrb r0, [r4, #0x8]
+bl <chord_analog_read+end|chord_analog_write+0x0>
+ldrb r1, [r4, #0xb]
+orrs r1, r5
+ldrb r0, [r4, #0x9]
+cmp r0, #0x1
+bne <chord_row_setup+0x90>
+ands r1, r6
+movs r0, #0xc0
+bl <chord_analog_read+end|chord_analog_write+0x0>
+b <chord_row_setup+0x94>
+ldr r0, [r4]
+strb r1, [r0, #0x1]
+pop {r4, r5, r6}
+pop {r0}
+mov lr, r0
+bx lr
+== copy_sector 97
+push {r4, r5, r6, r7, lr}
+sub sp, #0x9c
+str r2, [sp, #0x10]
+str r1, [sp, #0xc]
+movs r4, r0
+movs r5, #0x1
+lsls r0, r5, #0x11
+movs r7, r4
+bics r7, r0
+bl <feeder+end|tlsr_boot_guard_feed+0x0>
+str r5, [sp, #0x8]
+lsls r1, r5, #0xc
+str r4, [sp]
+movs r0, r4
+str r1, [sp, #0x14]
+bl <tlsr_slot_erase+0x0>
+movs r4, r0
+add r0, sp, #0x5c
+adds r0, #0x8
+str r0, [sp, #0x4]
+movs r6, #0x0
+cmp r4, #0x0
+bne <copy_sector+0xc8>
+ldr r0, [sp, #0x14]
+cmp r6, r0
+bhs <copy_sector+0xc8>
+ldr r0, [sp, #0xc]
+adds r0, r0, r6
+add r1, sp, #0x5c
+movs r2, #0x40
+bl <tlsr_slot_flash+end|tlsr_slot_read+0x0>
+movs r4, r0
+orrs r0, r6
+rsbs r5, r0, #0
+adcs r5, r0
+ldr r0, [sp, #0x10]
+cmp r0, #0x0
+beq <copy_sector+0x60>
+cmp r5, #0x0
+beq <copy_sector+0x60>
+movs r2, #0x4
+ldr r0, [sp, #0x4]
+ldr r1, [pc, POOL] =0x1c7c6 kat+end|knlt+0x0|str:4b4e4c54
+bl <ble_radio_give+end|memcpy+0x0>
+subs r0, r7, #0x1
+mov r12, r7
+mov r1, r12
+sbcs r1, r0
+ldr r0, [sp, #0x8]
+eors r5, r0
+orrs r5, r1
+bne <copy_sector+0x8a>
+add r0, sp, #0x18
+movs r4, #0x4
+ldr r5, [sp, #0x4]
+movs r1, r5
+movs r2, r4
+bl <ble_radio_give+end|memcpy+0x0>
+movs r1, #0xff
+movs r0, r5
+movs r2, r4
+bl <memset+0x0|scaled+end>
+b <copy_sector+0x8e>
+cmp r4, #0x0
+bne <copy_sector+0xbe>
+ldr r0, [sp]
+adds r5, r0, r6
+add r1, sp, #0x5c
+movs r2, #0x40
+movs r0, r5
+bl <tlsr_slot_write+0x0|tlsr_slot_write_failed+end>
+cmp r0, #0x0
+bne <copy_sector+0xbc>
+add r1, sp, #0x1c
+movs r2, #0x40
+movs r0, r5
+bl <tlsr_slot_flash+end|tlsr_slot_read+0x0>
+cmp r0, #0x0
+bne <copy_sector+0xbc>
+add r0, sp, #0x5c
+add r1, sp, #0x1c
+movs r2, #0x40
+bl <memcmp+0x0|strcmp+end>
+cmp r0, #0x0
+bne <copy_sector+0xc2>
+movs r4, r0
+adds r6, #0x40
+b <copy_sector+0x2e>
+movs r0, #0x4
+mvns r4, r0
+b <copy_sector+0xbe>
+movs r0, r4
+add sp, #0x9c
+pop {r4, r5, r6, r7}
+pop {r1}
+mov lr, r1
+bx lr
+== count_boot 133
+push {r4, r5, r6, r7, lr}
+sub sp, #0x4c
+movs r4, r0
+ldr r0, [pc, POOL] =0x8448dc _k_thread_obj_tlsr_wd_feeder+end|counted+0x0
+movs r6, #0x1
+strb r6, [r0]
+lsls r0, r6, #0x1f
+ldr r1, [pc, POOL] =0x842b5c guard_info+0x0|healthy_work+end
+ldr r1, [r1, #0x10]
+cmp r1, r0
+bne <count_boot+0x1a>
+bl <flash_unlock+0x0|tlsr_boot_guard_early+end>
+bl <tlsr_slot_drop_journal+end|tlsr_slot_revert_resume+0x0>
+bl <own_tag+0x0|tlsr_boot_guard_plan_wake+end>
+str r0, [sp]
+add r0, sp, #0x4
+movs r1, #0xff
+strb r1, [r0]
+movs r0, #0xd
+lsls r5, r0, #0xf
+add r1, sp, #0x48
+movs r2, #0x4
+movs r0, r5
+bl <tlsr_slot_flash+end|tlsr_slot_read+0x0>
+movs r7, #0x0
+ldr r1, [pc, POOL] =0x842b5c guard_info+0x0|healthy_work+end
+strb r7, [r1, #0x8]
+cmp r0, #0x0
+bne <count_boot+0x5a>
+ldr r1, [sp, #0x48]
+adds r2, r1, #0x1
+beq <count_boot+0x5a>
+ldr r0, [sp]
+cmp r1, r0
+beq <count_boot+0x5e>
+lsls r1, r6, #0xc
+movs r0, r5
+bl <tlsr_slot_erase+0x0>
+movs r7, #0x0
+b <count_boot+0x84>
+cmp r0, #0x0
+bne <count_boot+0x7e>
+adds r0, r5, #0x4
+add r1, sp, #0x4
+movs r2, #0x1
+bl <tlsr_slot_flash+end|tlsr_slot_read+0x0>
+cmp r0, #0x0
+bne <count_boot+0x7c>
+movs r0, r5
+adds r0, #0x10
+add r1, sp, #0x8
+movs r2, #0x40
+bl <tlsr_slot_flash+end|tlsr_slot_read+0x0>
+cmp r0, #0x0
+beq <count_boot+0xf4>
+movs r7, #0x0
+movs r1, r7
+ldr r2, [pc, POOL] =0x842b5c guard_info+0x0|healthy_work+end
+strb r1, [r2, #0x8]
+ldr r1, [pc, POOL] =0x800072
+ldrb r2, [r1]
+strb r6, [r1]
+cmp r4, #0x0
+bne <count_boot+0xd2>
+ldr r1, [pc, POOL] =0x842b5c guard_info+0x0|healthy_work+end
+ldrb r1, [r1, #0x8]
+lsls r1, r1, #0x1f
+bne <count_boot+0xd2>
+cmp r0, #0x0
+bne <count_boot+0xd2>
+ldr r0, [sp]
+str r0, [sp, #0x8]
+add r1, sp, #0x48
+movs r2, #0x4
+movs r0, r5
+bl <tlsr_slot_flash+end|tlsr_slot_read+0x0>
+cmp r0, #0x0
+bne <count_boot+0xbc>
+ldr r1, [sp, #0x48]
+adds r1, r1, #0x1
+bne <count_boot+0xbc>
+add r1, sp, #0x8
+movs r2, #0x4
+movs r0, r5
+bl <tlsr_slot_write+0x0|tlsr_slot_write_failed+end>
+cmp r7, #0x3f
+bhi <count_boot+0xd0>
+cmp r0, #0x0
+bne <count_boot+0xd0>
+adds r0, r5, r7
+adds r0, #0x10
+ldr r1, [pc, POOL] =0x1c7f2 counter_add.zero+0x0|counter_clear.confirmed+end
+movs r2, #0x1
+bl <tlsr_slot_write+0x0|tlsr_slot_write_failed+end>
+adds r7, r7, #0x1
+cmp r4, #0x0
+bne <count_boot+0xda>
+cmp r0, #0x0
+bne <count_boot+0xe2>
+cmp r0, #0x0
+bne <count_boot+0xe6>
+cmp r7, #0x3
+blo <count_boot+0xe6>
+bl <check_image+end|tlsr_slot_revert+0x0>
+ldr r0, [pc, POOL] =0x842b5c guard_info+0x0|healthy_work+end
+strb r7, [r0, #0x6]
+add sp, #0x4c
+pop {r4, r5, r6, r7}
+pop {r0}
+mov lr, r0
+bx lr
+movs r7, #0x0
+cmp r7, #0x40
+beq <count_boot+0x106>
+add r0, sp, #0x8
+ldrb r0, [r0, r7]
+cmp r0, #0x0
+bne <count_boot+0x106>
+adds r7, r7, #0x1
+b <count_boot+0xf6>
+movs r0, #0x0
+ldr r1, [sp, #0x48]
+ldr r2, [sp]
+cmp r1, r2
+bne <count_boot+0x11c>
+add r0, sp, #0x4
+ldrb r0, [r0]
+rsbs r1, r0, #0
+adcs r1, r0
+movs r0, #0x0
+b <count_boot+0x80>
+movs r1, r0
+b <count_boot+0x80>
+== counter_clear 78
+push {r1, r2, r3, r4, r5, r6, r7, lr}
+movs r5, r0
+mov r0, sp
+movs r1, #0xff
+strb r1, [r0]
+movs r0, #0xd
+lsls r4, r0, #0xf
+add r1, sp, #0x8
+movs r2, #0x4
+movs r0, r4
+bl <tlsr_slot_flash+end|tlsr_slot_read+0x0>
+cmp r0, #0x0
+bne <counter_clear+0xa2>
+movs r0, r4
+adds r0, #0x10
+add r1, sp, #0x4
+movs r6, #0x1
+movs r2, r6
+bl <tlsr_slot_flash+end|tlsr_slot_read+0x0>
+cmp r5, #0x0
+beq <counter_clear+0x5e>
+cmp r0, #0x0
+bne <counter_clear+0x5e>
+adds r0, r4, #0x4
+mov r7, sp
+movs r2, #0x1
+movs r1, r7
+bl <tlsr_slot_flash+end|tlsr_slot_read+0x0>
+add r1, sp, #0x4
+cmp r0, #0x0
+bne <counter_clear+0x5e>
+ldrb r2, [r7]
+cmp r2, #0x0
+bne <counter_clear+0x5e>
+ldrb r1, [r1]
+cmp r1, #0xff
+bne <counter_clear+0x5e>
+ldr r7, [sp, #0x8]
+bl <own_tag+0x0|tlsr_boot_guard_plan_wake+end>
+cmp r7, r0
+bne <counter_clear+0x62>
+movs r0, #0x0
+b <counter_clear+0xa2>
+cmp r0, #0x0
+bne <counter_clear+0xa2>
+add r0, sp, #0x4
+ldr r1, [sp, #0x8]
+adds r1, r1, #0x1
+bne <counter_clear+0x74>
+ldrb r0, [r0]
+cmp r0, #0xff
+bne <counter_clear+0x74>
+movs r0, #0x0
+b <counter_clear+0x7c>
+lsls r1, r6, #0xc
+movs r0, r4
+bl <tlsr_slot_erase+0x0>
+cmp r5, #0x0
+beq <counter_clear+0xa2>
+cmp r0, #0x0
+bne <counter_clear+0xa2>
+bl <own_tag+0x0|tlsr_boot_guard_plan_wake+end>
+str r0, [sp, #0x8]
+add r1, sp, #0x8
+movs r2, #0x4
+movs r0, r4
+bl <tlsr_slot_write+0x0|tlsr_slot_write_failed+end>
+cmp r0, #0x0
+bne <counter_clear+0xa2>
+adds r0, r4, #0x4
+ldr r1, [pc, POOL] =0x1c7f1 counter_clear.confirmed+0x0|ota_report_desc+end
+movs r2, #0x1
+bl <tlsr_slot_write+0x0|tlsr_slot_write_failed+end>
+pop {r1, r2, r3, r4, r5, r6, r7}
+pop {r1}
+mov lr, r1
+bx lr
+mov r8, r8
+== crc32_ieee_update 28
+push {r4, r5, r6, lr}
+mvns r4, r0
+ldr r0, [pc, POOL] =0x1bf78 crc32_ieee_update.table+0x0|hid_api+end
+movs r3, #0xf
+cmp r2, #0x0
+beq <crc32_ieee_update+0x2e>
+ldrb r5, [r1]
+lsrs r6, r4, #0x4
+eors r4, r5
+lsls r4, r4, #0x1c
+lsrs r4, r4, #0x1a
+ldr r4, [r0, r4]
+eors r4, r6
+lsrs r6, r4, #0x4
+ands r4, r3
+lsrs r5, r5, #0x4
+eors r5, r4
+lsls r4, r5, #0x2
+ldr r4, [r0, r4]
+eors r4, r6
+subs r2, r2, #0x1
+adds r1, r1, #0x1
+b <crc32_ieee_update+0x8>
+mvns r0, r4
+pop {r4, r5, r6}
+pop {r1}
+mov lr, r1
+bx lr
+== flash_unlock 13
+push {r4, lr}
+ldr r4, [pc, POOL] =0x842b5c guard_info+0x0|healthy_work+end
+movs r0, r4
+adds r0, #0xa
+movs r1, r4
+adds r1, #0xc
+bl <tlsr_spi_flash_unlock+0x0>
+str r0, [r4, #0x10]
+pop {r4}
+pop {r0}
+mov lr, r0
+bx lr
+mov r8, r8
+== io_write_blanked 80
+push {r4, r5, r6, r7, lr}
+sub sp, #0x1c
+str r2, [sp, #0x14]
+movs r7, r0
+ldr r0, [pc, POOL] =0x800643
+ldrb r4, [r0]
+movs r2, #0x0
+strb r2, [r0]
+lsls r0, r4, #0x1f
+ldr r6, [sp, #0x30]
+str r3, [sp, #0x18]
+bne <io_write_blanked+0x3a>
+str r4, [sp, #0x10]
+movs r4, r1
+bl <denc_update+end|led_key_matrix_blank+0x0>
+str r6, [sp]
+movs r0, #0xff
+adds r0, #0x62
+ldr r1, [pc, POOL] =0x1950 tlsr8278_setup_chip_init_tail+end|tlsr_flash_send_addr+0x0|tlsr_spi_flash_io+0x0
+adds r5, r1, r0
+movs r0, r7
+movs r1, r4
+ldr r2, [sp, #0x14]
+ldr r3, [sp, #0x18]
+ldr r4, [sp, #0x10]
+bl <io_write_blanked+end=d4d44728>
+b <io_write_blanked+0x9a>
+mov r5, lr
+str r7, [sp, #0x10]
+str r2, [sp, #0x8]
+ldr r7, [pc, POOL] =0x844600 z_tc32_irq_lock_depth+0x0|z_tc32_irq_lock_owner+end
+ldr r0, [r7]
+cmp r0, #0x7
+str r1, [sp, #0xc]
+bhi <io_write_blanked+0x52>
+lsls r1, r0, #0x2
+ldr r2, [pc, POOL] =0x8445e0 settings_save_dst+end|z_tc32_irq_lock_owner+0x0
+str r5, [r2, r1]
+b <io_write_blanked+0x56>
+ldr r1, [pc, POOL] =0x844608 z_tc32_irq_lock_max_depth+end|z_tc32_irq_lock_overflow_ra+0x0
+str r5, [r1]
+adds r0, r0, #0x1
+str r0, [r7]
+ldr r1, [r7]
+ldr r0, [pc, POOL] =0x844604 z_tc32_irq_lock_depth+end|z_tc32_irq_lock_max_depth+0x0
+ldr r2, [r0]
+cmp r1, r2
+bls <io_write_blanked+0x68>
+ldr r1, [r7]
+str r1, [r0]
+bl <denc_update+end|led_key_matrix_blank+0x0>
+str r6, [sp]
+movs r0, #0xff
+adds r0, #0x62
+ldr r1, [pc, POOL] =0x1950 tlsr8278_setup_chip_init_tail+end|tlsr_flash_send_addr+0x0|tlsr_spi_flash_io+0x0
+adds r5, r1, r0
+ldr r0, [sp, #0x10]
+ldr r1, [sp, #0xc]
+ldr r2, [sp, #0x14]
+ldr r3, [sp, #0x18]
+bl <io_write_blanked+end=d4d44728>
+ldr r0, [r7]
+cmp r0, #0x0
+beq <io_write_blanked+0x9a>
+ldr r0, [r7]
+subs r0, r0, #0x1
+str r0, [r7]
+cmp r0, #0x7
+bhi <io_write_blanked+0x9a>
+lsls r0, r0, #0x2
+ldr r1, [pc, POOL] =0x8445e0 settings_save_dst+end|z_tc32_irq_lock_owner+0x0
+ldr r2, [sp, #0x8]
+str r2, [r1, r0]
+ldr r0, [pc, POOL] =0x800643
+strb r4, [r0]
+add sp, #0x1c
+pop {r4, r5, r6, r7}
+pop {r0}
+mov lr, r0
+bx lr
+== led_key_matrix_blank 34
+push {r4, r5, r7, lr}
+movs r1, #0xfb
+ldr r0, [pc, POOL] =0x8434e4 denc_data_0+end|lkm+0x0
+ldrb r1, [r0, r1]
+cmp r1, #0x1
+bne <led_key_matrix_blank+0x3a>
+ldr r1, [pc, POOL] =0x800780
+ldrb r2, [r1, #0x1]
+movs r3, #0xfe
+ands r3, r2
+strb r3, [r1, #0x1]
+ldrb r2, [r1]
+movs r3, #0xc1
+ands r3, r2
+strb r3, [r1]
+movs r1, #0x60
+movs r2, #0x70
+cmp r2, #0x74
+beq <led_key_matrix_blank+0x3a>
+ldr r3, [r0, r1]
+cmp r3, #0x0
+beq <led_key_matrix_blank+0x3a>
+ldrb r4, [r0, r2]
+ldrb r5, [r3, #0x3]
+orrs r5, r4
+strb r5, [r3, #0x3]
+adds r1, r1, #0x4
+adds r2, r2, #0x1
+b <led_key_matrix_blank+0x22>
+pop {r4, r5, r7}
+pop {r0}
+mov lr, r0
+bx lr
+mov r8, r8
+== memcmp 26
+push {r4, r5, r6, r7, lr}
+cmp r2, #0x0
+beq <memcmp+0x22>
+subs r2, r2, #0x1
+movs r3, r2
+movs r4, r0
+movs r5, r1
+cmp r3, #0x0
+beq <memcmp+0x26>
+ldrb r6, [r5]
+ldrb r7, [r4]
+cmp r7, r6
+bne <memcmp+0x2a>
+subs r3, r3, #0x1
+adds r5, r5, #0x1
+adds r4, r4, #0x1
+b <memcmp+0xe>
+movs r0, #0x0
+b <memcmp+0x2c>
+ldrb r6, [r1, r2]
+ldrb r7, [r0, r2]
+subs r0, r7, r6
+pop {r4, r5, r6, r7}
+pop {r1}
+mov lr, r1
+bx lr
+== memcpy 12
+push {r4, lr}
+movs r3, #0x0
+cmp r2, r3
+beq <memcpy+0x10>
+ldrb r4, [r1, r3]
+strb r4, [r0, r3]
+adds r3, r3, #0x1
+b <memcpy+0x4>
+pop {r4}
+pop {r1}
+mov lr, r1
+bx lr
+== memset 7
+movs r3, #0x0
+cmp r2, r3
+beq <memset+0xc>
+strb r1, [r0, r3]
+adds r3, r3, #0x1
+b <memset+0x2>
+bx lr
+== own_crc 12
+push {r5, r6, r7, lr}
+add r1, sp, #0x4
+bl <tlsr_reboot+end|tlsr_slot_check+0x0>
+cmp r0, #0x0
+beq <own_crc+0x10>
+movs r0, #0x0
+b <own_crc+0x12>
+ldr r0, [sp, #0x4]
+pop {r2, r3, r7}
+pop {r1}
+mov lr, r1
+bx lr
+== own_tag 35
+push {r2, r3, r4, r5, r7, lr}
+bl <tlsr_slot_running+0x0>
+movs r5, r0
+movs r4, #0x0
+str r4, [sp, #0x4]
+str r4, [sp]
+adds r0, #0x18
+add r1, sp, #0x4
+movs r2, #0x4
+bl <tlsr_slot_flash+end|tlsr_slot_read+0x0>
+movs r1, #0xf
+ldr r0, [sp, #0x4]
+ands r1, r0
+cmp r1, #0x4
+bne <own_tag+0x40>
+movs r1, r0
+subs r1, #0x24
+ldr r2, [pc, POOL] =0x1ffdc
+cmp r1, r2
+bhi <own_tag+0x40>
+adds r0, r5, r0
+subs r0, r0, #0x4
+mov r1, sp
+movs r2, #0x4
+bl <tlsr_slot_flash+end|tlsr_slot_read+0x0>
+ldr r4, [sp]
+adds r0, r4, #0x1
+bne <own_tag+0x40>
+movs r4, #0x0
+movs r0, r4
+pop {r2, r3, r4, r5, r7}
+pop {r1}
+mov lr, r1
+bx lr
+mov r8, r8
+== planned_boot 7
+push {r7, lr}
+bl <own_tag+0x0|tlsr_boot_guard_plan_wake+end>
+bl <spi_flash_get_parameters+end|tlsr_reboot_was_planned+0x0>
+pop {r7}
+pop {r1}
+mov lr, r1
+bx lr
+== planned_read 60
+push {r3, r4, r5, r6, r7, lr}
+ldr r1, [pc, POOL] =0x800643
+ldrb r2, [r1]
+movs r3, #0x0
+strb r3, [r1]
+movs r4, #0x1
+ands r4, r2
+beq <planned_read+0x3e>
+mov r5, lr
+ldr r0, [pc, POOL] =0x844600 z_tc32_irq_lock_depth+0x0|z_tc32_irq_lock_owner+end
+ldr r6, [r0]
+cmp r6, #0x7
+bhi <planned_read+0x28>
+lsls r7, r6, #0x2
+str r7, [sp]
+ldr r7, [pc, POOL] =0x8445e0 settings_save_dst+end|z_tc32_irq_lock_owner+0x0
+ldr r1, [sp]
+str r5, [r7, r1]
+ldr r1, [pc, POOL] =0x800643
+b <planned_read+0x2c>
+ldr r7, [pc, POOL] =0x844608 z_tc32_irq_lock_max_depth+end|z_tc32_irq_lock_overflow_ra+0x0
+str r5, [r7]
+adds r5, r6, #0x1
+str r5, [r0]
+ldr r6, [r0]
+ldr r5, [pc, POOL] =0x844604 z_tc32_irq_lock_depth+end|z_tc32_irq_lock_max_depth+0x0
+ldr r7, [r5]
+cmp r6, r7
+bls <planned_read+0x3e>
+ldr r0, [r0]
+str r0, [r5]
+ldr r5, [pc, POOL] =0x8000b8
+movs r0, #0x3c
+strb r0, [r5]
+movs r0, #0x40
+strb r0, [r5, #0x2]
+ldrb r0, [r5, #0x2]
+lsls r0, r0, #0x1f
+bne <planned_read+0x48>
+ldrb r0, [r5, #0x1]
+strb r3, [r5, #0x2]
+cmp r4, #0x0
+beq <planned_read+0x6e>
+ldr r4, [pc, POOL] =0x844600 z_tc32_irq_lock_depth+0x0|z_tc32_irq_lock_owner+end
+ldr r5, [r4]
+cmp r5, #0x0
+beq <planned_read+0x6e>
+ldr r5, [r4]
+subs r5, r5, #0x1
+str r5, [r4]
+cmp r5, #0x7
+bhi <planned_read+0x6e>
+lsls r4, r5, #0x2
+ldr r5, [pc, POOL] =0x8445e0 settings_save_dst+end|z_tc32_irq_lock_owner+0x0
+str r3, [r5, r4]
+strb r2, [r1]
+pop {r3, r4, r5, r6, r7}
+pop {r1}
+mov lr, r1
+bx lr
+== planned_write 62
+push {r3, r4, r5, r6, r7, lr}
+ldr r7, [pc, POOL] =0x800643
+ldrb r2, [r7]
+movs r3, #0x0
+strb r3, [r7]
+movs r4, #0x1
+ands r4, r2
+beq <planned_write+0x40>
+mov r5, lr
+ldr r6, [pc, POOL] =0x844600 z_tc32_irq_lock_depth+0x0|z_tc32_irq_lock_owner+end
+ldr r7, [r6]
+cmp r7, #0x7
+bhi <planned_write+0x28>
+lsls r1, r7, #0x2
+str r1, [sp]
+ldr r1, [pc, POOL] =0x8445e0 settings_save_dst+end|z_tc32_irq_lock_owner+0x0
+ldr r6, [sp]
+str r5, [r1, r6]
+ldr r6, [pc, POOL] =0x844600 z_tc32_irq_lock_depth+0x0|z_tc32_irq_lock_owner+end
+b <planned_write+0x2c>
+ldr r1, [pc, POOL] =0x844608 z_tc32_irq_lock_max_depth+end|z_tc32_irq_lock_overflow_ra+0x0
+str r5, [r1]
+adds r1, r7, #0x1
+str r1, [r6]
+ldr r1, [r6]
+ldr r5, [pc, POOL] =0x844604 z_tc32_irq_lock_depth+end|z_tc32_irq_lock_max_depth+0x0
+ldr r7, [r5]
+cmp r1, r7
+ldr r7, [pc, POOL] =0x800643
+bls <planned_write+0x40>
+ldr r1, [r6]
+str r1, [r5]
+ldr r5, [pc, POOL] =0x8000b8
+movs r1, #0x3c
+strb r1, [r5]
+strb r0, [r5, #0x1]
+movs r0, #0x60
+strb r0, [r5, #0x2]
+ldrb r0, [r5, #0x2]
+lsls r0, r0, #0x1f
+bne <planned_write+0x4c>
+strb r3, [r5, #0x2]
+cmp r4, #0x0
+beq <planned_write+0x70>
+ldr r0, [pc, POOL] =0x844600 z_tc32_irq_lock_depth+0x0|z_tc32_irq_lock_owner+end
+ldr r1, [r0]
+cmp r1, #0x0
+beq <planned_write+0x70>
+ldr r1, [r0]
+subs r4, r1, #0x1
+str r4, [r0]
+cmp r4, #0x7
+bhi <planned_write+0x70>
+lsls r0, r4, #0x2
+ldr r1, [pc, POOL] =0x8445e0 settings_save_dst+end|z_tc32_irq_lock_owner+0x0
+str r3, [r1, r0]
+strb r2, [r7]
+pop {r3, r4, r5, r6, r7}
+pop {r0}
+mov lr, r0
+bx lr
+mov r8, r8
+== read_back 63
+push {r4, r5, r6, r7, lr}
+sub sp, #0x54
+movs r5, r1
+movs r6, #0x0
+movs r1, #0x40
+str r5, [sp, #0x10]
+movs r3, r2
+str r6, [sp]
+str r2, [sp, #0x8]
+str r1, [sp, #0x4]
+cmp r3, #0x40
+mov r12, r3
+mov r4, r12
+blo <read_back+0x1e>
+movs r4, r1
+cmp r2, r6
+bls <read_back+0x7c>
+str r3, [sp, #0xc]
+subs r2, r2, r6
+cmp r2, #0x40
+blo <read_back+0x2c>
+movs r2, r1
+movs r7, r0
+adds r0, r6, r0
+add r1, sp, #0x14
+bl <tlsr_slot_flash+end|tlsr_slot_read+0x0>
+cmp r0, #0x0
+bne <read_back+0x72>
+add r0, sp, #0x14
+ldr r1, [sp, #0x10]
+cmp r4, #0x0
+beq <read_back+0x5a>
+cmp r5, #0x0
+beq <read_back+0x4a>
+ldrb r2, [r1]
+b <read_back+0x4c>
+movs r2, #0xff
+ldrb r3, [r0]
+subs r4, r4, #0x1
+adds r1, r1, #0x1
+adds r0, r0, #0x1
+cmp r2, r3
+beq <read_back+0x3e>
+b <read_back+0x6e>
+ldr r0, [sp, #0x10]
+adds r0, #0x40
+str r0, [sp, #0x10]
+ldr r3, [sp, #0xc]
+subs r3, #0x40
+adds r6, #0x40
+ldr r2, [sp, #0x8]
+movs r0, r7
+ldr r1, [sp, #0x4]
+b <read_back+0x14>
+movs r0, #0x4
+mvns r0, r0
+add sp, #0x54
+pop {r4, r5, r6, r7}
+pop {r1}
+mov lr, r1
+bx lr
+ldr r0, [sp]
+b <read_back+0x72>
+== read_image 40
+push {r1, r2, r3, r4, r5, r6, r7, lr}
+movs r4, r2
+str r0, [sp, #0x8]
+lsrs r0, r2, #0xc
+movs r5, #0x0
+ldr r6, [sp, #0x20]
+cmp r0, #0x0
+mov r12, r5
+mov r7, r12
+bne <read_image+0x36>
+movs r0, #0x1
+lsls r0, r0, #0xc
+subs r0, r0, r4
+cmp r6, r0
+mov r12, r6
+mov r7, r12
+blo <read_image+0x24>
+movs r7, r0
+adds r0, r4, r1
+movs r1, r3
+movs r2, r7
+str r3, [sp, #0x4]
+bl <tlsr_slot_flash+end|tlsr_slot_read+0x0>
+ldr r3, [sp, #0x4]
+cmp r0, #0x0
+bne <read_image+0x4c>
+cmp r6, r7
+mov r12, r5
+mov r0, r12
+bls <read_image+0x4c>
+adds r1, r3, r7
+subs r2, r6, r7
+ldr r0, [sp, #0x8]
+adds r0, r4, r0
+adds r0, r0, r7
+bl <tlsr_slot_flash+end|tlsr_slot_read+0x0>
+pop {r1, r2, r3, r4, r5, r6, r7}
+pop {r1}
+mov lr, r1
+bx lr
+== read_status 7
+push {r7, lr}
+movs r0, #0x5
+bl <tlsr_spi_flash_read_status+0x0>
+pop {r7}
+pop {r1}
+mov lr, r1
+bx lr
+== revert_finish 120
+push {r4, r5, r6, r7, lr}
+sub sp, #0x8c
+str r2, [sp, #0x8]
+str r1, [sp, #0x4]
+movs r6, r0
+movs r0, #0x35
+lsls r7, r0, #0xd
+movs r4, #0x0
+movs r5, #0x40
+lsrs r0, r4, #0xc
+bne <revert_finish+0x54>
+adds r0, r6, r4
+add r1, sp, #0x4c
+movs r2, r5
+bl <tlsr_slot_flash+end|tlsr_slot_read+0x0>
+cmp r0, #0x0
+bne <revert_finish+0xbc>
+adds r4, r4, r7
+add r1, sp, #0xc
+movs r0, r4
+movs r2, r5
+bl <tlsr_slot_flash+end|tlsr_slot_read+0x0>
+cmp r0, #0x0
+bne <revert_finish+0xbc>
+add r0, sp, #0x4c
+add r1, sp, #0xc
+movs r2, #0x40
+bl <memcmp+0x0|strcmp+end>
+ldr r1, [pc, POOL] =0xfff96040
+adds r4, r4, r1
+cmp r0, #0x0
+beq <revert_finish+0x12>
+movs r2, #0x0
+movs r0, r6
+movs r1, r7
+bl <copy_sector+0x0|tlsr_slot_revert+end>
+cmp r0, #0x0
+bne <revert_finish+0xbc>
+add r1, sp, #0xc
+movs r0, r6
+bl <tlsr_reboot+end|tlsr_slot_check+0x0>
+movs r5, r0
+ldr r7, [sp, #0xc]
+cmp r0, #0x0
+bne <revert_finish+0x9c>
+ldr r0, [sp, #0x8]
+cmp r7, r0
+bne <revert_finish+0x9c>
+adds r6, #0x8
+ldr r1, [pc, POOL] =0x1c7c6 kat+end|knlt+0x0|str:4b4e4c54
+movs r2, #0x4
+movs r0, r6
+bl <tlsr_slot_write+0x0|tlsr_slot_write_failed+end>
+cmp r0, #0x0
+bne <revert_finish+0xbc>
+add r1, sp, #0x4c
+movs r4, #0x4
+movs r0, r6
+movs r2, r4
+bl <tlsr_slot_flash+end|tlsr_slot_read+0x0>
+cmp r0, #0x0
+bne <revert_finish+0xbc>
+add r0, sp, #0x4c
+ldr r1, [pc, POOL] =0x1c7c6 kat+end|knlt+0x0|str:4b4e4c54
+movs r2, r4
+bl <memcmp+0x0|strcmp+end>
+cmp r0, #0x0
+beq <revert_finish+0xc6>
+mvns r0, r4
+b <revert_finish+0xbc>
+adds r6, #0x8
+ldr r1, [pc, POOL] =0x1c7ca knlt+end|revert_finish.cleared+0x0
+movs r4, #0x4
+movs r0, r6
+movs r2, r4
+bl <tlsr_slot_write+0x0|tlsr_slot_write_failed+end>
+ldr r0, [sp, #0x8]
+cmp r7, r0
+beq <revert_finish+0xb4>
+mvns r0, r4
+b <revert_finish+0xb6>
+movs r0, #0x0
+cmp r5, #0x0
+beq <revert_finish+0xbc>
+movs r0, r5
+add sp, #0x8c
+pop {r4, r5, r6, r7}
+pop {r1}
+mov lr, r1
+bx lr
+movs r0, #0x69
+lsls r0, r0, #0xc
+movs r1, #0x1
+lsls r1, r1, #0xd
+bl <tlsr_slot_erase+0x0>
+cmp r0, #0x0
+bne <revert_finish+0xbc>
+ldr r4, [sp, #0x4]
+adds r4, #0x8
+add r1, sp, #0x4c
+movs r2, #0x4
+movs r0, r4
+bl <tlsr_slot_flash+end|tlsr_slot_read+0x0>
+cmp r0, #0x0
+bne <revert_finish+0xbc>
+add r0, sp, #0x4c
+ldr r1, [pc, POOL] =0x1c7ca knlt+end|revert_finish.cleared+0x0
+movs r2, #0x4
+bl <memcmp+0x0|strcmp+end>
+cmp r0, #0x0
+beq <revert_finish+0x104>
+ldr r1, [pc, POOL] =0x1c7ca knlt+end|revert_finish.cleared+0x0
+movs r2, #0x4
+movs r0, r4
+bl <tlsr_slot_write+0x0|tlsr_slot_write_failed+end>
+cmp r0, #0x0
+bne <revert_finish+0xbc>
+ldr r0, [sp, #0x8]
+bl <tlsr_plan_reset+end|tlsr_reboot+0x0>
+mov r8, r8
+== soc_early_init_hook 17
+push {r4, r5, r7, lr}
+ldr r0, [pc, POOL] =0x605 tlsr8278_analog_read+0x9
+ldr r4, [pc, POOL] =0xe3c tlsr8278_setup_blob+0x0|tlsr8278_setup_udiv+0x0|tlsr_radio_tx_on_rx+end
+adds r5, r4, r0
+bl <tlsr8278_early_watchdog_start+0x0>
+movs r0, #0x43
+movs r1, #0x0
+bl <soc_early_init_hook+end=47084728>
+movs r0, #0xff
+adds r0, #0xbe
+adds r1, r4, r0
+movs r0, #0x20
+bl <soc_early_init_hook+0x32=48044708>
+pop {r4, r5, r7}
+pop {r0}
+mov lr, r0
+bx lr
+== sys_arch_reboot 30
+ldr r0, [pc, POOL] =0x800643
+ldrb r2, [r0]
+movs r3, #0x0
+strb r3, [r0]
+lsls r0, r2, #0x1f
+beq <sys_arch_reboot+0x34>
+mov r1, lr
+ldr r0, [pc, POOL] =0x844600 z_tc32_irq_lock_depth+0x0|z_tc32_irq_lock_owner+end
+ldr r2, [r0]
+cmp r2, #0x7
+bhi <sys_arch_reboot+0x1e>
+lsls r3, r2, #0x2
+ldr r4, [pc, POOL] =0x8445e0 settings_save_dst+end|z_tc32_irq_lock_owner+0x0
+str r1, [r4, r3]
+b <sys_arch_reboot+0x22>
+ldr r3, [pc, POOL] =0x844608 z_tc32_irq_lock_max_depth+end|z_tc32_irq_lock_overflow_ra+0x0
+str r1, [r3]
+adds r1, r2, #0x1
+str r1, [r0]
+ldr r2, [r0]
+ldr r1, [pc, POOL] =0x844604 z_tc32_irq_lock_depth+end|z_tc32_irq_lock_max_depth+0x0
+ldr r3, [r1]
+cmp r2, r3
+bls <sys_arch_reboot+0x34>
+ldr r0, [r0]
+str r0, [r1]
+ldr r0, [pc, POOL] =0x80006f
+movs r1, #0x20
+strb r1, [r0]
+b <sys_arch_reboot+0x3a>
+== sys_reboot 30
+ldr r1, [pc, POOL] =0x800643
+ldrb r3, [r1]
+movs r4, #0x0
+strb r4, [r1]
+lsls r1, r3, #0x1f
+beq <sys_reboot+0x34>
+mov r2, lr
+ldr r1, [pc, POOL] =0x844600 z_tc32_irq_lock_depth+0x0|z_tc32_irq_lock_owner+end
+ldr r3, [r1]
+cmp r3, #0x7
+bhi <sys_reboot+0x1e>
+lsls r4, r3, #0x2
+ldr r5, [pc, POOL] =0x8445e0 settings_save_dst+end|z_tc32_irq_lock_owner+0x0
+str r2, [r5, r4]
+b <sys_reboot+0x22>
+ldr r4, [pc, POOL] =0x844608 z_tc32_irq_lock_max_depth+end|z_tc32_irq_lock_overflow_ra+0x0
+str r2, [r4]
+adds r2, r3, #0x1
+str r2, [r1]
+ldr r3, [r1]
+ldr r2, [pc, POOL] =0x844604 z_tc32_irq_lock_depth+end|z_tc32_irq_lock_max_depth+0x0
+ldr r4, [r2]
+cmp r3, r4
+bls <sys_reboot+0x34>
+ldr r1, [r1]
+str r1, [r2]
+bl <sys_arch_reboot+0x0|tlsr8278_pad_wakeup+end>
+bl <_tc32_boot_copy_lma_end+0x0|_tc32_boot_copy_size_+0x0|arch_cpu_idle+0x0|trim_analog_read+end>
+b <sys_reboot+0x38>
+mov r8, r8
+== tlsr_boot_guard_early 114
+push {r4, r5, r6, r7, lr}
+sub sp, #0x4c
+bl <flash_unlock+0x0|tlsr_boot_guard_early+end>
+bl <tlsr_slot_drop_journal+end|tlsr_slot_revert_resume+0x0>
+bl <planned_boot+0x0|tlsr_boot_guard_forget+end>
+movs r4, r0
+cmp r0, #0x0
+bne <tlsr_boot_guard_early+0xec>
+str r4, [sp, #0x1c]
+add r7, sp, #0x34
+ldr r1, [pc, POOL] =0x1c010 ota_ops+end|tlsr_boot_guard.c.obj:.rodata..L__const.chord_held.rows+0x0
+movs r2, #0x18
+movs r0, r7
+bl <__aeabi_memcpy+0x0|__aeabi_memcpy4+0x0|__aeabi_memcpy8+0x0|__tc32_udivmoddi4_proven+end>
+ldr r0, [pc, POOL] =0x1bf24 action_target_state+end|const:88058000050000009005800000000000+0x0
+add r4, sp, #0x24
+movs r1, r4
+ldm r0!, {r2, r3, r5, r6}
+stm r1!, {r2, r3, r5, r6}
+movs r0, r7
+bl <chord_row_setup+0x0|tlsr_boot_guard_healthy_soon+end>
+adds r7, #0xc
+str r7, [sp, #0x20]
+movs r0, r7
+bl <chord_row_setup+0x0|tlsr_boot_guard_healthy_soon+end>
+ldr r0, [pc, POOL] =0x80058a
+ldrb r1, [r0]
+str r1, [sp, #0x18]
+strb r1, [r4, #0x5]
+ldrb r1, [r0, #0x1]
+str r1, [sp, #0x14]
+strb r1, [r4, #0x6]
+ldrb r1, [r0, #0x4]
+str r1, [sp, #0x10]
+strb r1, [r4, #0x7]
+ldrb r1, [r0, #0x8]
+str r1, [sp, #0xc]
+strb r1, [r4, #0xd]
+ldrb r1, [r0, #0x9]
+str r1, [sp, #0x8]
+strb r1, [r4, #0xe]
+ldrb r0, [r0, #0xc]
+str r0, [sp, #0x4]
+strb r0, [r4, #0xf]
+movs r0, #0x0
+cmp r0, #0x10
+beq <tlsr_boot_guard_early+0x8c>
+add r1, sp, #0x24
+adds r2, r1, r0
+ldrb r2, [r2, #0x4]
+movs r3, #0x1
+lsls r3, r2
+ldr r1, [r1, r0]
+ldrb r2, [r1, #0x6]
+orrs r2, r3
+strb r2, [r1, #0x6]
+ldrb r2, [r1, #0x3]
+bics r2, r3
+strb r2, [r1, #0x3]
+ldrb r2, [r1, #0x2]
+bics r2, r3
+strb r2, [r1, #0x2]
+adds r0, #0x8
+b <tlsr_boot_guard_early+0x66>
+add r6, sp, #0x24
+adds r6, #0x8
+movs r5, #0x0
+movs r7, #0x1
+movs r4, r5
+cmp r4, #0x2
+bhi <tlsr_boot_guard_early+0xbc>
+lsls r0, r7, #0x1f
+beq <tlsr_boot_guard_early+0xbc>
+add r0, sp, #0x34
+add r1, sp, #0x24
+bl <chord_key_down+0x0|chord_pin_save+end>
+cmp r0, #0x0
+mov r12, r5
+mov r7, r12
+beq <tlsr_boot_guard_early+0xb8>
+ldr r0, [sp, #0x20]
+movs r1, r6
+bl <chord_key_down+0x0|chord_pin_save+end>
+movs r7, r0
+adds r4, r4, #0x1
+b <tlsr_boot_guard_early+0x96>
+ldr r0, [pc, POOL] =0x80058a
+ldr r1, [sp, #0xc]
+strb r1, [r0, #0x8]
+ldr r1, [sp, #0x8]
+strb r1, [r0, #0x9]
+ldr r1, [sp, #0x4]
+strb r1, [r0, #0xc]
+ldr r1, [sp, #0x18]
+strb r1, [r0]
+ldr r1, [sp, #0x14]
+strb r1, [r0, #0x1]
+ldr r1, [sp, #0x10]
+strb r1, [r0, #0x4]
+ldr r0, [sp, #0x20]
+bl <chord_pin_restore+end|chord_row_restore+0x0>
+add r0, sp, #0x34
+bl <chord_pin_restore+end|chord_row_restore+0x0>
+lsls r0, r7, #0x1f
+ldr r4, [sp, #0x1c]
+beq <tlsr_boot_guard_early+0xec>
+bl <check_image+end|tlsr_slot_revert+0x0>
+movs r0, r4
+bl <count_boot+0x0|flash_unlock+end>
+add sp, #0x4c
+pop {r4, r5, r6, r7}
+pop {r0}
+mov lr, r0
+bx lr
+== tlsr_boot_guard_feed 21
+push {r7, lr}
+ldr r0, [pc, POOL] =0x8448dc _k_thread_obj_tlsr_wd_feeder+end|counted+0x0
+adds r0, r0, #0x4
+bl <atomic_get+0x0|boot_banner+end>
+cmp r0, #0x0
+bne <tlsr_boot_guard_feed+0x16>
+ldr r0, [pc, POOL] =0x844dcf write_failed+end|z_sys_post_kernel+0x0
+ldrb r0, [r0]
+cmp r0, #0x0
+bne <tlsr_boot_guard_feed+0x22>
+ldr r0, [pc, POOL] =0x800623
+movs r1, #0x8
+strb r1, [r0]
+ldr r0, [pc, POOL] =0x800638
+movs r1, #0x0
+str r1, [r0]
+pop {r7}
+pop {r0}
+mov lr, r0
+bx lr
+mov r8, r8
+== tlsr_boot_guard_forget 7
+push {r7, lr}
+movs r0, #0x0
+bl <counter_clear+0x0|tlsr_boot_guard_confirm+end>
+pop {r7}
+pop {r0}
+mov lr, r0
+bx lr
+== tlsr_flash_delay_us 8
+ldr r2, [pc, POOL] =0x800740
+ldr r1, [r2]
+lsls r0, r0, #0x4
+ldr r3, [r2]
+subs r3, r3, r1
+cmp r0, r3
+bhs <tlsr_flash_delay_us+0x6|tlsr_spi_flash_io+0x1e2>
+bx lr
+== tlsr_flash_read_cmd 79
+push {r4, r5, r6, r7, lr}
+mov r7, r10
+mov r6, r8
+push {r6, r7}
+mov r10, r1
+ldr r6, [sp, #0x1c]
+ldr r4, [sp, #0x20]
+lsls r0, r0, #0x18
+lsrs r0, r0, #0x18
+lsls r2, r2, #0x18
+lsrs r7, r2, #0x18
+lsls r5, r3, #0x18
+lsrs r5, r5, #0x18
+ldr r3, [pc, POOL] =0x800643
+ldrb r2, [r3]
+mov r8, r2
+movs r2, #0x0
+strb r2, [r3]
+bl <tlsr_flash_send_addr+end|tlsr_flash_send_cmd+0x0|tlsr_spi_flash_io+0x40>
+cmp r7, #0x0
+bne <tlsr_flash_read_cmd+0x9a|tlsr_spi_flash_io+0x14a>
+cmp r5, #0x0
+beq <tlsr_flash_read_cmd+0x4c|tlsr_spi_flash_io+0xfc>
+movs r0, #0x0
+ldr r2, [pc, POOL] =0x80000c
+mov r12, r2
+movs r7, #0x0
+ldr r1, [pc, POOL] =0x80000d
+movs r2, #0x10
+mov r3, r12
+strb r7, [r3]
+ldrb r3, [r1]
+tst r2, r3
+bne <tlsr_flash_read_cmd+0x40|tlsr_spi_flash_io+0xf0>
+adds r0, #0x1
+cmp r0, r5
+blt <tlsr_flash_read_cmd+0x3c|tlsr_spi_flash_io+0xec>
+movs r2, #0x0
+ldr r3, [pc, POOL] =0x80000c
+strb r2, [r3]
+ldr r0, [pc, POOL] =0x80000d
+movs r1, #0x10
+ldr r2, [pc, POOL] =0x80000d
+ldrb r3, [r0]
+tst r1, r3
+bne <tlsr_flash_read_cmd+0x56|tlsr_spi_flash_io+0x106>
+movs r3, #0xa
+strb r3, [r2]
+movs r1, #0x10
+ldrb r3, [r2]
+tst r1, r3
+bne <tlsr_flash_read_cmd+0x64|tlsr_spi_flash_io+0x114>
+cmp r4, #0x0
+beq <tlsr_flash_read_cmd+0x86|tlsr_spi_flash_io+0x136>
+movs r0, #0x0
+ldr r5, [pc, POOL] =0x80000c
+ldr r1, [pc, POOL] =0x80000d
+movs r2, #0x10
+ldrb r3, [r5]
+strb r3, [r6, r0]
+ldrb r3, [r1]
+tst r2, r3
+bne <tlsr_flash_read_cmd+0x7a|tlsr_spi_flash_io+0x12a>
+adds r0, #0x1
+cmp r0, r4
+bne <tlsr_flash_read_cmd+0x76|tlsr_spi_flash_io+0x126>
+movs r2, #0x1
+ldr r3, [pc, POOL] =0x80000d
+strb r2, [r3]
+ldr r3, [pc, POOL] =0x800643
+mov r2, r8
+strb r2, [r3]
+pop {r2, r3}
+mov r8, r2
+mov r10, r3
+pop {r4, r5, r6, r7, pc}
+mov r0, r10
+bl <tlsr8278_setup_chip_init_tail+end|tlsr_flash_send_addr+0x0|tlsr_spi_flash_io+0x0>
+b <tlsr_flash_read_cmd+0x2c|tlsr_spi_flash_io+0xdc>
+== tlsr_flash_send_cmd 16
+push {r4, r5, lr}
+adds r5, r0, #0x0
+ldr r4, [pc, POOL] =0x80000d
+movs r3, #0x1
+strb r3, [r4]
+movs r0, #0x1
+bl <tlsr_flash_delay_us+0x0|tlsr_flash_write_cmd+end|tlsr_spi_flash_io+0x1dc>
+movs r3, #0x0
+strb r3, [r4]
+ldr r3, [pc, POOL] =0x80000c
+strb r5, [r3]
+movs r2, #0x10
+ldrb r3, [r4]
+tst r2, r3
+bne <tlsr_flash_send_cmd+0x1a|tlsr_spi_flash_io+0x5a>
+pop {r4, r5, pc}
+== tlsr_flash_wait_ready 25
+push {r4, r5, r6, lr}
+movs r0, #0x64
+bl <tlsr_flash_delay_us+0x0|tlsr_flash_write_cmd+end|tlsr_spi_flash_io+0x1dc>
+movs r0, #0x5
+bl <tlsr_flash_send_addr+end|tlsr_flash_send_cmd+0x0|tlsr_spi_flash_io+0x40>
+ldr r0, [pc, POOL] =0x989680
+ldr r4, [pc, POOL] =0x80000c
+movs r6, #0x0
+ldr r1, [pc, POOL] =0x80000d
+movs r2, #0x10
+movs r5, #0x1
+strb r6, [r4]
+ldrb r3, [r1]
+tst r2, r3
+bne <tlsr_flash_wait_ready+0x1c|tlsr_spi_flash_io+0x88>
+ldrb r3, [r4]
+tst r5, r3
+beq <tlsr_flash_wait_ready+0x2e|tlsr_spi_flash_io+0x9a>
+subs r0, #0x1
+cmp r0, #0x0
+bne <tlsr_flash_wait_ready+0x1a|tlsr_spi_flash_io+0x86>
+movs r2, #0x1
+ldr r3, [pc, POOL] =0x80000d
+strb r2, [r3]
+pop {r4, r5, r6, pc}
+== tlsr_flash_write_cmd 52
+push {r4, r5, r6, r7, lr}
+mov r7, r10
+mov r6, r8
+push {r6, r7}
+mov r10, r1
+adds r5, r3, #0x0
+ldr r4, [sp, #0x1c]
+lsls r0, r0, #0x18
+lsrs r6, r0, #0x18
+lsls r2, r2, #0x18
+lsrs r7, r2, #0x18
+ldr r3, [pc, POOL] =0x800643
+ldrb r2, [r3]
+mov r8, r2
+movs r2, #0x0
+strb r2, [r3]
+movs r0, #0x6
+bl <tlsr_flash_send_addr+end|tlsr_flash_send_cmd+0x0|tlsr_spi_flash_io+0x40>
+adds r0, r6, #0x0
+bl <tlsr_flash_send_addr+end|tlsr_flash_send_cmd+0x0|tlsr_spi_flash_io+0x40>
+cmp r7, #0x0
+bne <tlsr_flash_write_cmd+0x68|tlsr_spi_flash_io+0x1c8>
+cmp r4, #0x0
+beq <tlsr_flash_write_cmd+0x50|tlsr_spi_flash_io+0x1b0>
+movs r3, #0x0
+movs r0, #0x0
+ldr r6, [pc, POOL] =0x80000c
+ldr r1, [pc, POOL] =0x80000d
+movs r2, #0x10
+ldrb r3, [r5, r3]
+strb r3, [r6]
+ldrb r3, [r1]
+tst r2, r3
+bne <tlsr_flash_write_cmd+0x42|tlsr_spi_flash_io+0x1a2>
+adds r0, #0x1
+adds r3, r0, #0x0
+cmp r0, r4
+bne <tlsr_flash_write_cmd+0x3e|tlsr_spi_flash_io+0x19e>
+movs r2, #0x1
+ldr r3, [pc, POOL] =0x80000d
+strb r2, [r3]
+bl <tlsr_flash_send_cmd+end|tlsr_flash_wait_ready+0x0|tlsr_spi_flash_io+0x6c>
+ldr r3, [pc, POOL] =0x800643
+mov r2, r8
+strb r2, [r3]
+pop {r2, r3}
+mov r8, r2
+mov r10, r3
+pop {r4, r5, r6, r7, pc}
+mov r0, r10
+bl <tlsr8278_setup_chip_init_tail+end|tlsr_flash_send_addr+0x0|tlsr_spi_flash_io+0x0>
+b <tlsr_flash_write_cmd+0x30|tlsr_spi_flash_io+0x190>
+== tlsr_planned_mark 18
+movs r1, r0
+lsrs r0, r0, #0x8
+lsrs r2, r1, #0x10
+eors r2, r0
+lsrs r0, r1, #0x18
+eors r0, r2
+eors r0, r1
+movs r1, #0xff
+movs r2, r0
+ands r2, r1
+cmp r2, #0xf
+beq <tlsr_planned_mark+0x1c>
+cmp r2, #0x0
+bne <tlsr_planned_mark+0x20>
+movs r2, #0xa5
+eors r0, r2
+ands r0, r1
+bx lr
+== tlsr_reboot 4
+bl <k_sem_take+end|tlsr_planned_mark+0x0>
+bl <planned_read+end|planned_write+0x0>
+movs r0, #0x1
+bl <ring_buf_get_ptr+end|sys_reboot+0x0>
+== tlsr_reboot_was_planned 40
+push {r3, r4, r5, r6, r7, lr}
+movs r4, r0
+bl <planned_read+0x0|tlsr_reboot_was_planned+end>
+movs r5, r0
+movs r0, r4
+bl <k_sem_take+end|tlsr_planned_mark+0x0>
+movs r6, r0
+ldr r1, [pc, POOL] =0x8447a8 generation+end|mark_stuck+0x0
+movs r4, #0x0
+strb r4, [r1]
+movs r7, #0x1
+cmp r5, #0xf
+beq <tlsr_reboot_was_planned+0x2e>
+movs r0, #0xf
+bl <planned_read+end|planned_write+0x0>
+bl <planned_read+0x0|tlsr_reboot_was_planned+end>
+ldr r1, [pc, POOL] =0x8447a8 generation+end|mark_stuck+0x0
+cmp r0, #0xf
+bne <tlsr_reboot_was_planned+0x38>
+cmp r5, r6
+bne <tlsr_reboot_was_planned+0x3a>
+movs r0, #0x1
+movs r4, r7
+b <tlsr_reboot_was_planned+0x44>
+strb r7, [r1]
+cmp r5, #0x0
+beq <tlsr_reboot_was_planned+0x42>
+cmp r5, #0xf
+bne <tlsr_reboot_was_planned+0x50>
+movs r0, r4
+str r0, [r1, #0x4]
+movs r0, r4
+pop {r3, r4, r5, r6, r7}
+pop {r1}
+mov lr, r1
+bx lr
+subs r0, r5, r6
+beq <tlsr_reboot_was_planned+0x44>
+movs r0, #0x2
+b <tlsr_reboot_was_planned+0x44>
+== tlsr_slot_check 8
+push {r7, lr}
+movs r2, r1
+movs r1, r0
+bl <check_image+0x0|tlsr_slot_running_checked+end>
+pop {r7}
+pop {r1}
+mov lr, r1
+bx lr
+== tlsr_slot_erase 49
+push {r3, r4, r5, r6, r7, lr}
+movs r2, r1
+movs r5, r0
+ldr r0, [pc, POOL] =0x844dcf write_failed+end|z_sys_post_kernel+0x0
+ldrb r0, [r0]
+cmp r0, #0x0
+beq <tlsr_slot_erase+0x3a>
+ldr r0, [pc, POOL] =0x1a79c __device_dts_ord_70+0x0|__device_usb_hid_device_1+end
+ldr r0, [r0, #0x8]
+ldr r3, [r0, #0x8]
+cmp r3, #0x0
+beq <tlsr_slot_erase+0x52>
+ldr r0, [pc, POOL] =0x1a79c __device_dts_ord_70+0x0|__device_usb_hid_device_1+end
+movs r1, r5
+str r2, [sp]
+bl <tlsr_slot_erase+end=d4d44718>
+cmp r0, #0x0
+bne <tlsr_slot_erase+0x36>
+movs r6, #0x0
+movs r0, r5
+movs r1, r6
+ldr r2, [sp]
+bl <read_back+0x0|tlsr_planned_mark+end>
+cmp r0, #0x0
+beq <tlsr_slot_erase+0x5c>
+movs r6, r0
+b <tlsr_slot_erase+0x56>
+str r2, [sp]
+adds r7, r2, r5
+movs r0, #0x1
+lsls r4, r0, #0xc
+movs r6, r5
+cmp r6, r7
+bhs <tlsr_slot_erase+0x26>
+movs r0, r6
+bl <tlsr_spi_flash_erase_sector+0x0|tlsr_spi_flash_page_program+end>
+adds r6, r6, r4
+b <tlsr_slot_erase+0x44>
+movs r0, #0x57
+mvns r6, r0
+ldr r0, [pc, POOL] =0x844dce trim_calibrated+end|write_failed+0x0
+movs r1, #0x1
+strb r1, [r0]
+movs r0, r6
+pop {r3, r4, r5, r6, r7}
+pop {r1}
+mov lr, r1
+bx lr
+mov r8, r8
+== tlsr_slot_read 22
+push {r4, lr}
+movs r3, r2
+movs r2, r1
+movs r1, r0
+ldr r0, [pc, POOL] =0x844dcf write_failed+end|z_sys_post_kernel+0x0
+ldrb r0, [r0]
+cmp r0, #0x0
+beq <tlsr_slot_read+0x1c>
+ldr r0, [pc, POOL] =0x1a79c __device_dts_ord_70+0x0|__device_usb_hid_device_1+end
+ldr r4, [r0, #0x8]
+ldr r4, [r4]
+bl <tlsr_slot_read+end=d4d44720>
+b <tlsr_slot_read+0x26>
+movs r0, r1
+movs r1, r3
+bl <b87_stimer_init+end|tlsr_spi_flash_read+0x0>
+movs r0, #0x0
+pop {r4}
+pop {r1}
+mov lr, r1
+bx lr
+mov r8, r8
+== tlsr_slot_revert 105
+push {r4, r5, r6, r7, lr}
+sub sp, #0x2c
+ldr r0, [pc, POOL] =0x1bf54 const:52565254000000000000000000000000+0x0|sca_ppm+end|str:52565254
+add r1, sp, #0x18
+ldm r0!, {r2, r3, r4}
+stm r1!, {r2, r3, r4}
+add r0, sp, #0x28
+bl <tlsr_slot_running+end|tlsr_slot_running_checked+0x0>
+cmp r0, #0x0
+bne <tlsr_slot_revert+0x3c>
+ldr r4, [sp, #0x28]
+cmp r4, #0x0
+beq <tlsr_slot_revert+0x20>
+movs r5, #0x0
+b <tlsr_slot_revert+0x24>
+movs r0, #0x1
+lsls r5, r0, #0x11
+str r5, [sp, #0x1c]
+movs r0, r4
+bl <own_crc+0x0|tlsr_slot_check+end>
+str r0, [sp, #0x24]
+add r1, sp, #0x18
+adds r1, #0x8
+movs r0, r5
+bl <tlsr_reboot+end|tlsr_slot_check+0x0>
+cmp r0, #0x0
+beq <tlsr_slot_revert+0x4a>
+movs r6, r0
+movs r0, r6
+add sp, #0x2c
+pop {r4, r5, r6, r7}
+pop {r1}
+mov lr, r1
+bx lr
+str r4, [sp, #0x4]
+bl <tlsr_spi_flash_trim_raise+0x0>
+movs r0, #0x35
+lsls r7, r0, #0xd
+movs r4, #0x1
+movs r0, r7
+movs r1, r5
+movs r2, r4
+bl <copy_sector+0x0|tlsr_slot_revert+end>
+cmp r0, #0x0
+beq <tlsr_slot_revert+0x6c>
+movs r6, r0
+bl <tlsr_spi_flash_trim_raise+end|tlsr_spi_flash_trim_restore+0x0>
+b <tlsr_slot_revert+0x3e>
+add r2, sp, #0x8
+movs r0, r5
+movs r1, r7
+bl <check_image+0x0|tlsr_slot_running_checked+end>
+movs r1, #0x4
+mvns r7, r1
+ldr r1, [sp, #0x20]
+ldr r2, [sp, #0x8]
+cmp r2, r1
+beq <tlsr_slot_revert+0x86>
+movs r6, r7
+b <tlsr_slot_revert+0x88>
+movs r6, #0x0
+movs r3, r4
+cmp r0, #0x0
+beq <tlsr_slot_revert+0x92>
+mov r12, r0
+mov r6, r12
+bne <tlsr_slot_revert+0x66>
+cmp r2, r1
+bne <tlsr_slot_revert+0x66>
+movs r0, #0x69
+lsls r4, r0, #0xc
+lsls r1, r3, #0xc
+movs r0, r4
+bl <tlsr_slot_erase+0x0>
+cmp r0, #0x0
+bne <tlsr_slot_revert+0x64>
+add r1, sp, #0x18
+movs r2, #0x10
+movs r0, r4
+bl <tlsr_slot_write+0x0|tlsr_slot_write_failed+end>
+cmp r0, #0x0
+bne <tlsr_slot_revert+0x64>
+add r1, sp, #0x8
+movs r2, #0x10
+movs r0, r4
+bl <tlsr_slot_flash+end|tlsr_slot_read+0x0>
+cmp r0, #0x0
+bne <tlsr_slot_revert+0x64>
+add r0, sp, #0x18
+add r1, sp, #0x8
+movs r2, #0x10
+bl <memcmp+0x0|strcmp+end>
+cmp r0, #0x0
+mov r12, r7
+mov r6, r12
+bne <tlsr_slot_revert+0x66>
+bl <confirmed_in_flash+end|tlsr_boot_guard_forget+0x0>
+ldr r2, [sp, #0x20]
+movs r0, r5
+ldr r1, [sp, #0x4]
+bl <copy_sector+end|revert_finish+0x0>
+cmp r0, #0x0
+bne <tlsr_slot_revert+0x64>
+movs r6, #0x0
+b <tlsr_slot_revert+0x3e>
+== tlsr_slot_revert_resume 68
+push {r4, r5, r6, lr}
+sub sp, #0x18
+movs r0, #0x69
+lsls r4, r0, #0xc
+add r1, sp, #0x4
+movs r2, #0x10
+movs r0, r4
+bl <tlsr_slot_flash+end|tlsr_slot_read+0x0>
+movs r5, r0
+cmp r0, #0x0
+bne <tlsr_slot_revert_resume+0x8c>
+ldr r0, [sp, #0x4]
+ldr r1, [pc, POOL] =0x54525652
+cmp r0, r1
+bne <tlsr_slot_revert_resume+0x8c>
+add r0, sp, #0x14
+bl <tlsr_slot_running+end|tlsr_slot_running_checked+0x0>
+movs r5, r0
+cmp r0, #0x0
+bne <tlsr_slot_revert_resume+0x8c>
+movs r6, #0x1
+ldr r5, [sp, #0x14]
+cmp r5, #0x0
+beq <tlsr_slot_revert_resume+0x38>
+movs r1, #0x0
+b <tlsr_slot_revert_resume+0x3a>
+lsls r1, r6, #0x11
+ldr r0, [sp, #0x8]
+cmp r0, r1
+bne <tlsr_slot_revert_resume+0x82>
+movs r1, #0x35
+lsls r1, r1, #0xd
+mov r2, sp
+bl <check_image+0x0|tlsr_slot_running_checked+end>
+cmp r0, #0x0
+bne <tlsr_slot_revert_resume+0x82>
+ldr r0, [sp, #0xc]
+ldr r1, [sp]
+cmp r1, r0
+bne <tlsr_slot_revert_resume+0x82>
+movs r0, r5
+bl <own_crc+0x0|tlsr_slot_check+end>
+ldr r1, [sp, #0x10]
+cmp r0, r1
+bne <tlsr_slot_revert_resume+0x82>
+bl <tlsr_spi_flash_trim_raise+0x0>
+ldr r2, [sp, #0xc]
+ldr r0, [sp, #0x8]
+movs r1, r5
+bl <copy_sector+end|revert_finish+0x0>
+movs r5, r0
+cmp r0, #0x0
+beq <tlsr_slot_revert_resume+0x7a>
+bl <tlsr_spi_flash_trim_raise+end|tlsr_spi_flash_trim_restore+0x0>
+cmp r5, #0x1
+bhi <tlsr_slot_revert_resume+0x8c>
+movs r5, r6
+b <tlsr_slot_revert_resume+0x8c>
+lsls r1, r6, #0xd
+movs r0, r4
+bl <revert_finish+end|tlsr_slot_drop_journal+0x0>
+movs r5, r0
+movs r0, r5
+add sp, #0x18
+pop {r4, r5, r6}
+pop {r1}
+mov lr, r1
+bx lr
+== tlsr_slot_running 6
+ldr r0, [pc, POOL] =0x80063e
+ldrh r0, [r0]
+subs r1, r0, #0x1
+sbcs r0, r1
+lsls r0, r0, #0x11
+bx lr
+== tlsr_slot_running_checked 65
+push {r4, r5, r6, r7, lr}
+sub sp, #0x8c
+movs r4, r0
+ldr r0, [pc, POOL] =0x80063e
+ldrh r0, [r0]
+subs r1, r0, #0x1
+sbcs r0, r1
+lsls r6, r0, #0x11
+movs r0, r6
+adds r0, #0x8
+add r1, sp, #0x4c
+movs r5, #0x1
+movs r2, r5
+bl <tlsr_slot_flash+end|tlsr_slot_read+0x0>
+cmp r0, #0x0
+bne <tlsr_slot_running_checked+0x7c>
+movs r0, #0x4
+mvns r1, r0
+add r0, sp, #0x4c
+ldrb r0, [r0]
+cmp r0, #0x4b
+bne <tlsr_slot_running_checked+0x72>
+str r1, [sp, #0x4]
+str r4, [sp, #0x8]
+lsls r7, r5, #0x8
+movs r4, #0x0
+movs r5, #0x40
+lsrs r0, r7, #0x8
+cmp r0, #0x2
+bhi <tlsr_slot_running_checked+0x76>
+movs r0, r4
+cmp r0, #0x40
+beq <tlsr_slot_running_checked+0x4e>
+ldrb r1, [r7, r0]
+add r2, sp, #0x4c
+strb r1, [r2, r0]
+adds r0, r0, #0x1
+b <tlsr_slot_running_checked+0x40>
+movs r0, r7
+orrs r0, r6
+add r1, sp, #0xc
+movs r2, r5
+bl <tlsr_slot_flash+end|tlsr_slot_read+0x0>
+cmp r0, #0x0
+bne <tlsr_slot_running_checked+0x7c>
+add r0, sp, #0x4c
+add r1, sp, #0xc
+movs r2, r5
+bl <memcmp+0x0|strcmp+end>
+adds r7, #0x40
+cmp r0, #0x0
+beq <tlsr_slot_running_checked+0x38>
+ldr r0, [sp, #0x4]
+b <tlsr_slot_running_checked+0x7c>
+movs r0, r1
+b <tlsr_slot_running_checked+0x7c>
+ldr r0, [sp, #0x8]
+str r6, [r0]
+movs r0, #0x0
+add sp, #0x8c
+pop {r4, r5, r6, r7}
+pop {r1}
+mov lr, r1
+bx lr
+mov r8, r8
+== tlsr_slot_write 37
+push {r3, r4, r5, r6, r7, lr}
+movs r4, r2
+movs r5, r1
+movs r6, r0
+ldr r0, [pc, POOL] =0x844dcf write_failed+end|z_sys_post_kernel+0x0
+ldrb r0, [r0]
+cmp r0, #0x0
+beq <tlsr_slot_write+0x26>
+ldr r0, [pc, POOL] =0x1a79c __device_dts_ord_70+0x0|__device_usb_hid_device_1+end
+ldr r1, [r0, #0x8]
+ldr r7, [r1, #0x4]
+movs r1, r6
+movs r2, r5
+movs r3, r4
+bl <tlsr_slot_write+end=d4d44738>
+cmp r0, #0x0
+beq <tlsr_slot_write+0x30>
+b <tlsr_slot_write+0x3e>
+movs r0, r6
+movs r1, r4
+movs r2, r5
+bl <tlsr_spi_flash_page_program+0x0|zmk_debounce_update+end>
+movs r0, r6
+movs r1, r5
+movs r2, r4
+bl <read_back+0x0|tlsr_planned_mark+end>
+cmp r0, #0x0
+beq <tlsr_slot_write+0x46>
+ldr r1, [pc, POOL] =0x844dce trim_calibrated+end|write_failed+0x0
+movs r2, #0x1
+strb r2, [r1]
+b <tlsr_slot_write+0x48>
+movs r0, #0x0
+pop {r3, r4, r5, r6, r7}
+pop {r1}
+mov lr, r1
+bx lr
+== tlsr_spi_flash_delay_us 11
+push {r7, lr}
+movs r1, #0xff
+adds r1, #0xde
+ldr r2, [pc, POOL] =0x1950 tlsr8278_setup_chip_init_tail+end|tlsr_flash_send_addr+0x0|tlsr_spi_flash_io+0x0
+adds r1, r2, r1
+bl <tlsr_spi_flash_delay_us+end=d4d44708>
+pop {r7}
+pop {r0}
+mov lr, r0
+bx lr
+mov r8, r8
+== tlsr_spi_flash_erase_sector 11
+push {r5, r6, r7, lr}
+movs r1, r0
+movs r3, #0x0
+str r3, [sp]
+movs r0, #0x20
+movs r2, #0x1
+bl <io_write_blanked+0x0>
+pop {r2, r3, r7}
+pop {r0}
+mov lr, r0
+bx lr
+== tlsr_spi_flash_io 208
+lsls r2, r0, #0x8
+lsrs r2, r2, #0x18
+ldr r3, [pc, POOL] =0x80000c
+strb r2, [r3]
+ldr r1, [pc, POOL] =0x80000d
+movs r2, #0x10
+ldrb r3, [r1]
+tst r2, r3
+bne <tlsr_flash_send_addr+0xc|tlsr_spi_flash_io+0xc>
+lsls r2, r0, #0x10
+lsrs r2, r2, #0x18
+ldr r3, [pc, POOL] =0x80000c
+strb r2, [r3]
+ldr r1, [pc, POOL] =0x80000d
+movs r2, #0x10
+ldrb r3, [r1]
+tst r2, r3
+bne <tlsr_flash_send_addr+0x1e|tlsr_spi_flash_io+0x1e>
+lsls r0, r0, #0x18
+lsrs r0, r0, #0x18
+ldr r3, [pc, POOL] =0x80000c
+strb r0, [r3]
+ldr r1, [pc, POOL] =0x80000d
+movs r2, #0x10
+ldrb r3, [r1]
+tst r2, r3
+bne <tlsr_flash_send_addr+0x30|tlsr_spi_flash_io+0x30>
+bx lr
+push {r4, r5, lr}
+adds r5, r0, #0x0
+ldr r4, [pc, POOL] =0x80000d
+movs r3, #0x1
+strb r3, [r4]
+movs r0, #0x1
+bl <tlsr_flash_delay_us+0x0|tlsr_flash_write_cmd+end|tlsr_spi_flash_io+0x1dc>
+movs r3, #0x0
+strb r3, [r4]
+ldr r3, [pc, POOL] =0x80000c
+strb r5, [r3]
+movs r2, #0x10
+ldrb r3, [r4]
+tst r2, r3
+bne <tlsr_flash_send_cmd+0x1a|tlsr_spi_flash_io+0x5a>
+pop {r4, r5, pc}
+push {r4, r5, r6, lr}
+movs r0, #0x64
+bl <tlsr_flash_delay_us+0x0|tlsr_flash_write_cmd+end|tlsr_spi_flash_io+0x1dc>
+movs r0, #0x5
+bl <tlsr_flash_send_addr+end|tlsr_flash_send_cmd+0x0|tlsr_spi_flash_io+0x40>
+ldr r0, [pc, POOL] =0x989680
+ldr r4, [pc, POOL] =0x80000c
+movs r6, #0x0
+ldr r1, [pc, POOL] =0x80000d
+movs r2, #0x10
+movs r5, #0x1
+strb r6, [r4]
+ldrb r3, [r1]
+tst r2, r3
+bne <tlsr_flash_wait_ready+0x1c|tlsr_spi_flash_io+0x88>
+ldrb r3, [r4]
+tst r5, r3
+beq <tlsr_flash_wait_ready+0x2e|tlsr_spi_flash_io+0x9a>
+subs r0, #0x1
+cmp r0, #0x0
+bne <tlsr_flash_wait_ready+0x1a|tlsr_spi_flash_io+0x86>
+movs r2, #0x1
+ldr r3, [pc, POOL] =0x80000d
+strb r2, [r3]
+pop {r4, r5, r6, pc}
+push {r4, r5, r6, r7, lr}
+mov r7, r10
+mov r6, r8
+push {r6, r7}
+mov r10, r1
+ldr r6, [sp, #0x1c]
+ldr r4, [sp, #0x20]
+lsls r0, r0, #0x18
+lsrs r0, r0, #0x18
+lsls r2, r2, #0x18
+lsrs r7, r2, #0x18
+lsls r5, r3, #0x18
+lsrs r5, r5, #0x18
+ldr r3, [pc, POOL] =0x800643
+ldrb r2, [r3]
+mov r8, r2
+movs r2, #0x0
+strb r2, [r3]
+bl <tlsr_flash_send_addr+end|tlsr_flash_send_cmd+0x0|tlsr_spi_flash_io+0x40>
+cmp r7, #0x0
+bne <tlsr_flash_read_cmd+0x9a|tlsr_spi_flash_io+0x14a>
+cmp r5, #0x0
+beq <tlsr_flash_read_cmd+0x4c|tlsr_spi_flash_io+0xfc>
+movs r0, #0x0
+ldr r2, [pc, POOL] =0x80000c
+mov r12, r2
+movs r7, #0x0
+ldr r1, [pc, POOL] =0x80000d
+movs r2, #0x10
+mov r3, r12
+strb r7, [r3]
+ldrb r3, [r1]
+tst r2, r3
+bne <tlsr_flash_read_cmd+0x40|tlsr_spi_flash_io+0xf0>
+adds r0, #0x1
+cmp r0, r5
+blt <tlsr_flash_read_cmd+0x3c|tlsr_spi_flash_io+0xec>
+movs r2, #0x0
+ldr r3, [pc, POOL] =0x80000c
+strb r2, [r3]
+ldr r0, [pc, POOL] =0x80000d
+movs r1, #0x10
+ldr r2, [pc, POOL] =0x80000d
+ldrb r3, [r0]
+tst r1, r3
+bne <tlsr_flash_read_cmd+0x56|tlsr_spi_flash_io+0x106>
+movs r3, #0xa
+strb r3, [r2]
+movs r1, #0x10
+ldrb r3, [r2]
+tst r1, r3
+bne <tlsr_flash_read_cmd+0x64|tlsr_spi_flash_io+0x114>
+cmp r4, #0x0
+beq <tlsr_flash_read_cmd+0x86|tlsr_spi_flash_io+0x136>
+movs r0, #0x0
+ldr r5, [pc, POOL] =0x80000c
+ldr r1, [pc, POOL] =0x80000d
+movs r2, #0x10
+ldrb r3, [r5]
+strb r3, [r6, r0]
+ldrb r3, [r1]
+tst r2, r3
+bne <tlsr_flash_read_cmd+0x7a|tlsr_spi_flash_io+0x12a>
+adds r0, #0x1
+cmp r0, r4
+bne <tlsr_flash_read_cmd+0x76|tlsr_spi_flash_io+0x126>
+movs r2, #0x1
+ldr r3, [pc, POOL] =0x80000d
+strb r2, [r3]
+ldr r3, [pc, POOL] =0x800643
+mov r2, r8
+strb r2, [r3]
+pop {r2, r3}
+mov r8, r2
+mov r10, r3
+pop {r4, r5, r6, r7, pc}
+mov r0, r10
+bl <tlsr8278_setup_chip_init_tail+end|tlsr_flash_send_addr+0x0|tlsr_spi_flash_io+0x0>
+b <tlsr_flash_read_cmd+0x2c|tlsr_spi_flash_io+0xdc>
+push {r4, r5, r6, r7, lr}
+mov r7, r10
+mov r6, r8
+push {r6, r7}
+mov r10, r1
+adds r5, r3, #0x0
+ldr r4, [sp, #0x1c]
+lsls r0, r0, #0x18
+lsrs r6, r0, #0x18
+lsls r2, r2, #0x18
+lsrs r7, r2, #0x18
+ldr r3, [pc, POOL] =0x800643
+ldrb r2, [r3]
+mov r8, r2
+movs r2, #0x0
+strb r2, [r3]
+movs r0, #0x6
+bl <tlsr_flash_send_addr+end|tlsr_flash_send_cmd+0x0|tlsr_spi_flash_io+0x40>
+adds r0, r6, #0x0
+bl <tlsr_flash_send_addr+end|tlsr_flash_send_cmd+0x0|tlsr_spi_flash_io+0x40>
+cmp r7, #0x0
+bne <tlsr_flash_write_cmd+0x68|tlsr_spi_flash_io+0x1c8>
+cmp r4, #0x0
+beq <tlsr_flash_write_cmd+0x50|tlsr_spi_flash_io+0x1b0>
+movs r3, #0x0
+movs r0, #0x0
+ldr r6, [pc, POOL] =0x80000c
+ldr r1, [pc, POOL] =0x80000d
+movs r2, #0x10
+ldrb r3, [r5, r3]
+strb r3, [r6]
+ldrb r3, [r1]
+tst r2, r3
+bne <tlsr_flash_write_cmd+0x42|tlsr_spi_flash_io+0x1a2>
+adds r0, #0x1
+adds r3, r0, #0x0
+cmp r0, r4
+bne <tlsr_flash_write_cmd+0x3e|tlsr_spi_flash_io+0x19e>
+movs r2, #0x1
+ldr r3, [pc, POOL] =0x80000d
+strb r2, [r3]
+bl <tlsr_flash_send_cmd+end|tlsr_flash_wait_ready+0x0|tlsr_spi_flash_io+0x6c>
+ldr r3, [pc, POOL] =0x800643
+mov r2, r8
+strb r2, [r3]
+pop {r2, r3}
+mov r8, r2
+mov r10, r3
+pop {r4, r5, r6, r7, pc}
+mov r0, r10
+bl <tlsr8278_setup_chip_init_tail+end|tlsr_flash_send_addr+0x0|tlsr_spi_flash_io+0x0>
+b <tlsr_flash_write_cmd+0x30|tlsr_spi_flash_io+0x190>
+ldr r2, [pc, POOL] =0x800740
+ldr r1, [r2]
+lsls r0, r0, #0x4
+ldr r3, [r2]
+subs r3, r3, r1
+cmp r0, r3
+bhs <tlsr_flash_delay_us+0x6|tlsr_spi_flash_io+0x1e2>
+bx lr
+== tlsr_spi_flash_is_zbit 13
+push {r7, lr}
+bl <tlsr_spi_flash_jedec_id+0x0|tlsr_spi_flash_unlock+end>
+ldr r1, [pc, POOL] =0xffeecda2
+adds r1, r0, r1
+movs r0, #0x3
+lsls r0, r0, #0x10
+bics r1, r0
+rsbs r0, r1, #0
+adcs r0, r1
+pop {r7}
+pop {r1}
+mov lr, r1
+bx lr
+== tlsr_spi_flash_jedec_id 33
+push {r0, r1, r2, r3, r4, r5, r6, lr}
+ldr r4, [pc, POOL] =0x844784 jedec_id_read+0x0|last_announce_cycle+end
+ldrb r0, [r4]
+cmp r0, #0x1
+bne <tlsr_spi_flash_jedec_id+0xe>
+ldr r0, [r4, #0x4]
+b <tlsr_spi_flash_jedec_id+0x38>
+add r5, sp, #0xc
+movs r1, #0x0
+strb r1, [r5, #0x2]
+strh r1, [r5]
+movs r0, #0x3
+str r0, [sp, #0x4]
+str r5, [sp]
+ldr r6, [pc, POOL] =0x1950 tlsr8278_setup_chip_init_tail+end|tlsr_flash_send_addr+0x0|tlsr_spi_flash_io+0x0
+adds r6, #0xb1
+movs r0, #0x9f
+movs r2, r1
+movs r3, r1
+bl <tlsr_spi_flash_jedec_id+end=d4d44730>
+movs r0, #0x1
+strb r0, [r4]
+ldrh r0, [r5]
+ldrb r1, [r5, #0x2]
+lsls r1, r1, #0x10
+adds r0, r0, r1
+str r0, [r4, #0x4]
+add sp, #0x10
+pop {r4, r5, r6}
+pop {r1}
+mov lr, r1
+bx lr
+mov r8, r8
+== tlsr_spi_flash_page_program 69
+push {r4, r5, r6, r7, lr}
+sub sp, #0x3c
+movs r4, #0xff
+str r0, [sp, #0x10]
+ands r4, r0
+movs r3, #0x1
+lsls r0, r3, #0x8
+str r0, [sp, #0x8]
+subs r0, r0, r4
+str r2, [sp, #0x14]
+lsrs r2, r2, #0x12
+str r2, [sp, #0x4]
+cmp r1, r0
+str r1, [sp, #0x18]
+blo <tlsr_spi_flash_page_program+0x20>
+str r0, [sp, #0x18]
+str r1, [sp, #0xc]
+ldr r0, [sp, #0x4]
+cmp r0, #0x20
+bhi <tlsr_spi_flash_page_program+0x60>
+movs r6, #0x0
+ldr r4, [sp, #0x18]
+ldr r0, [sp, #0x18]
+cmp r6, r0
+bhs <tlsr_spi_flash_page_program+0x70>
+cmp r4, #0x20
+mov r12, r4
+mov r7, r12
+blo <tlsr_spi_flash_page_program+0x3c>
+movs r7, #0x20
+ldr r0, [sp, #0x14]
+adds r1, r0, r6
+add r5, sp, #0x1c
+movs r0, r5
+movs r2, r7
+bl <ble_radio_give+end|memcpy+0x0>
+str r7, [sp]
+ldr r0, [sp, #0x10]
+adds r1, r0, r6
+movs r0, #0x2
+movs r2, #0x1
+movs r3, r5
+bl <io_write_blanked+0x0>
+subs r4, #0x20
+adds r6, #0x20
+b <tlsr_spi_flash_page_program+0x2c>
+ldr r0, [sp, #0x18]
+str r0, [sp]
+movs r0, #0x2
+movs r2, #0x1
+ldr r1, [sp, #0x10]
+ldr r3, [sp, #0x14]
+bl <io_write_blanked+0x0>
+ldr r0, [sp, #0x14]
+ldr r2, [sp, #0x18]
+adds r0, r0, r2
+str r0, [sp, #0x14]
+ldr r0, [sp, #0x10]
+adds r0, r0, r2
+str r0, [sp, #0x10]
+ldr r1, [sp, #0xc]
+subs r1, r1, r2
+ldr r0, [sp, #0x8]
+bne <tlsr_spi_flash_page_program+0x18>
+add sp, #0x3c
+pop {r4, r5, r6, r7}
+pop {r0}
+mov lr, r0
+bx lr
+== tlsr_spi_flash_read 15
+push {r2, r3, r4, r5, r7, lr}
+movs r4, r0
+str r1, [sp, #0x4]
+str r2, [sp]
+ldr r5, [pc, POOL] =0x1950 tlsr8278_setup_chip_init_tail+end|tlsr_flash_send_addr+0x0|tlsr_spi_flash_io+0x0
+adds r5, #0xb1
+movs r0, #0x3
+movs r2, #0x1
+movs r3, #0x0
+movs r1, r4
+bl <tlsr_spi_flash_read+end=d4d44728>
+pop {r2, r3, r4, r5, r7}
+pop {r0}
+mov lr, r0
+bx lr
+== tlsr_spi_flash_read_status 19
+push {r0, r1, r2, r3, r4, r5, r7, lr}
+add r4, sp, #0xc
+movs r1, #0x0
+strb r1, [r4]
+movs r2, #0x1
+str r2, [sp, #0x4]
+str r4, [sp]
+ldr r5, [pc, POOL] =0x1950 tlsr8278_setup_chip_init_tail+end|tlsr_flash_send_addr+0x0|tlsr_spi_flash_io+0x0
+adds r5, #0xb1
+movs r2, r1
+movs r3, r1
+bl <tlsr_spi_flash_read_status+end=d4d44728>
+ldrb r0, [r4]
+add sp, #0x10
+pop {r4, r5, r7}
+pop {r1}
+mov lr, r1
+bx lr
+mov r8, r8
+== tlsr_spi_flash_trim_calib 35
+push {r0, r1, r2, r3, r4, r5, r7, lr}
+ldr r0, [pc, POOL] =0x844dcd board_polled+end|trim_calibrated+0x0
+ldrb r1, [r0]
+cmp r1, #0x0
+bne <tlsr_spi_flash_trim_calib+0x44>
+movs r2, #0x1
+strb r2, [r0]
+add r4, sp, #0xc
+movs r3, #0x0
+strh r3, [r4]
+movs r0, #0x2
+str r0, [sp, #0x4]
+str r4, [sp]
+ldr r5, [pc, POOL] =0x1950 tlsr8278_setup_chip_init_tail+end|tlsr_flash_send_addr+0x0|tlsr_spi_flash_io+0x0
+adds r5, #0xb1
+movs r0, #0x3
+ldr r1, [pc, POOL] =0x771c0
+bl <tlsr_spi_flash_trim_calib+end=d4d44728>
+ldrb r1, [r4]
+ldrb r0, [r4, #0x1]
+lsls r2, r0, #0x8
+adds r2, r2, r1
+ldr r3, [pc, POOL] =0xf8f8 tlsr8278_pad_wakeup+0x4c
+tst r2, r3
+beq <tlsr_spi_flash_trim_calib+0x40>
+bl <tlsr_spi_flash_is_zbit+0x0>
+cmp r0, #0x0
+beq <tlsr_spi_flash_trim_calib+0x44>
+movs r0, #0x7
+movs r1, #0x6
+bl <tlsr_flash_delay_us+end|tlsr_spi_flash_io+end|trim_set+0x0>
+pop {r0, r1, r2, r3, r4, r5, r7}
+pop {r0}
+mov lr, r0
+bx lr
+== tlsr_spi_flash_trim_raise 19
+push {r4, lr}
+bl <tlsr_spi_flash_is_zbit+0x0>
+cmp r0, #0x0
+beq <tlsr_spi_flash_trim_raise+0x22>
+ldr r4, [pc, POOL] =0x844784 jedec_id_read+0x0|last_announce_cycle+end
+ldrb r0, [r4, #0x1]
+cmp r0, #0x0
+bne <tlsr_spi_flash_trim_raise+0x1a>
+bl <trim_get+0x0|trim_set+end>
+movs r0, #0x1
+strb r0, [r4, #0x1]
+movs r0, #0x7
+movs r1, #0x6
+bl <tlsr_flash_delay_us+end|tlsr_spi_flash_io+end|trim_set+0x0>
+pop {r4}
+pop {r0}
+mov lr, r0
+bx lr
+mov r8, r8
+== tlsr_spi_flash_unlock 60
+push {r1, r2, r3, r4, r5, r6, r7, lr}
+movs r5, r1
+movs r4, r0
+bl <tlsr_spi_flash_jedec_id+0x0|tlsr_spi_flash_unlock+end>
+movs r6, r0
+bl <read_status+0x0|tlsr_spi_flash_write_status+end>
+strh r0, [r4]
+strh r0, [r5]
+movs r1, #0x85
+mvns r2, r1
+ldr r1, [pc, POOL] =0x13325e
+cmp r6, r1
+beq <tlsr_spi_flash_unlock+0x30>
+ldr r1, [pc, POOL] =0x1360c8
+cmp r6, r1
+beq <tlsr_spi_flash_unlock+0x30>
+ldr r1, [pc, POOL] =0x1460c8
+cmp r6, r1
+beq <tlsr_spi_flash_unlock+0x30>
+ldr r1, [pc, POOL] =0x14325e
+cmp r6, r1
+bne <tlsr_spi_flash_unlock+0x76>
+lsls r1, r0, #0x1b
+lsrs r1, r1, #0x1d
+beq <tlsr_spi_flash_unlock+0x6c>
+movs r7, #0x4
+movs r1, r2
+adds r1, #0x81
+str r1, [sp, #0x4]
+adds r2, #0x79
+str r2, [sp]
+movs r4, #0xe0
+movs r6, #0x1
+subs r7, r7, #0x1
+beq <tlsr_spi_flash_unlock+0x70>
+lsls r1, r0, #0x1e
+bne <tlsr_spi_flash_unlock+0x74>
+ands r0, r4
+add r1, sp, #0x8
+strb r0, [r1]
+movs r0, r1
+movs r1, r6
+bl <tlsr_spi_flash_erase_sector+end|tlsr_spi_flash_write_status+0x0>
+bl <read_status+0x0|tlsr_spi_flash_write_status+end>
+strh r0, [r5]
+lsls r1, r0, #0x1b
+lsrs r1, r1, #0x1d
+bne <tlsr_spi_flash_unlock+0x46>
+movs r2, r6
+b <tlsr_spi_flash_unlock+0x76>
+movs r2, #0x0
+b <tlsr_spi_flash_unlock+0x76>
+ldr r2, [sp, #0x4]
+b <tlsr_spi_flash_unlock+0x76>
+ldr r2, [sp]
+movs r0, r2
+pop {r1, r2, r3, r4, r5, r6, r7}
+pop {r1}
+mov lr, r1
+bx lr
+== tlsr8278_early_watchdog_start 10
+ldr r0, [pc, POOL] =0x800620
+ldr r1, [r0]
+movs r2, #0x0
+str r2, [r0, #0x18]
+movs r2, #0x3f
+ands r2, r1
+ldr r1, [pc, POOL] =0x85b840
+adds r1, r2, r1
+str r1, [r0]
+bx lr
+== tlsr8278_setup_analog_read 23
+push {r4, lr}
+lsls r0, r0, #0x18
+lsrs r0, r0, #0x18
+ldr r3, [pc, POOL] =0x800643
+ldrb r4, [r3]
+movs r2, #0x0
+strb r2, [r3]
+ldr r3, [pc, POOL] =0x8000b8
+strb r0, [r3]
+ldr r1, [pc, POOL] =0x8000ba
+movs r3, #0x40
+strb r3, [r1]
+movs r2, #0x1
+ldrb r3, [r1]
+ands r3, r2
+bne <tlsr8278_setup_analog_read+0x1a>
+ldr r2, [pc, POOL] =0x8000b9
+ldrb r0, [r2]
+adds r2, #0x1
+strb r3, [r2]
+ldr r3, [pc, POOL] =0x800643
+strb r4, [r3]
+pop {r4, pc}
+== tlsr8278_setup_analog_write 25
+push {r4, lr}
+lsls r0, r0, #0x18
+lsrs r0, r0, #0x18
+lsls r1, r1, #0x18
+lsrs r1, r1, #0x18
+ldr r3, [pc, POOL] =0x800643
+ldrb r4, [r3]
+movs r2, #0x0
+strb r2, [r3]
+ldr r3, [pc, POOL] =0x8000b8
+strb r0, [r3]
+adds r3, #0x1
+strb r1, [r3]
+ldr r1, [pc, POOL] =0x8000ba
+movs r3, #0x60
+strb r3, [r1]
+movs r2, #0x1
+ldrb r3, [r1]
+ands r3, r2
+bne <tlsr8278_setup_analog_write+0x22>
+ldr r2, [pc, POOL] =0x8000ba
+strb r3, [r2]
+ldr r3, [pc, POOL] =0x800643
+strb r4, [r3]
+pop {r4, pc}
+== tlsr8278_setup_analog88_check 78
+push {r4, r5, r6, r7, lr}
+mov r7, r10
+mov r6, r8
+push {r6, r7}
+sub sp, #0x4
+movs r0, #0x81
+bl <tlsr8278_setup_analog_read+0x0|tlsr8278_setup_mul_add+end>
+adds r4, r0, #0x0
+movs r1, #0x40
+orrs r1, r0
+lsls r1, r1, #0x18
+lsrs r1, r1, #0x18
+movs r0, #0x81
+bl <tlsr8278_setup_analog_read+end|tlsr8278_setup_analog_write+0x0>
+movs r3, #0xbf
+ands r3, r4
+mov r10, r3
+movs r6, #0x1
+movs r5, #0x0
+mov r4, sp
+adds r4, #0x3
+movs r7, #0x0
+movs r3, #0x20
+mov r8, r3
+strb r7, [r4]
+ldrb r3, [r4]
+cmp r3, #0x1d
+bhi <tlsr8278_setup_analog88_check+0x4e>
+mov r8, r8
+ldrb r3, [r4]
+adds r3, #0x1
+lsls r3, r3, #0x18
+lsrs r3, r3, #0x18
+strb r3, [r4]
+ldrb r3, [r4]
+cmp r3, #0x1d
+bls <tlsr8278_setup_analog88_check+0x3c>
+movs r0, #0x88
+bl <tlsr8278_setup_analog_read+0x0|tlsr8278_setup_mul_add+end>
+mov r3, r8
+tst r3, r0
+bne <tlsr8278_setup_analog88_check+0xa0>
+lsls r3, r5, #0x18
+lsrs r3, r3, #0x18
+cmp r3, #0x0
+beq <tlsr8278_setup_analog88_check+0x7c>
+cmp r3, #0x1
+beq <tlsr8278_setup_analog88_check+0x8e>
+movs r0, #0x81
+mov r1, r10
+bl <tlsr8278_setup_analog_read+end|tlsr8278_setup_analog_write+0x0>
+cmp r6, #0x2
+bls <tlsr8278_setup_analog88_check+0x84>
+add sp, #0x4
+pop {r2, r3}
+mov r8, r2
+mov r10, r3
+pop {r4, r5, r6, r7, pc}
+movs r0, #0x1
+movs r1, #0x4e
+bl <tlsr8278_setup_analog_read+end|tlsr8278_setup_analog_write+0x0>
+adds r5, #0x1
+adds r6, #0x1
+lsls r6, r6, #0x18
+lsrs r6, r6, #0x18
+b <tlsr8278_setup_analog88_check+0x34>
+movs r0, #0x1
+movs r1, #0x4b
+bl <tlsr8278_setup_analog_read+end|tlsr8278_setup_analog_write+0x0>
+adds r5, #0x1
+adds r6, #0x1
+lsls r6, r6, #0x18
+lsrs r6, r6, #0x18
+b <tlsr8278_setup_analog88_check+0x34>
+movs r0, #0x81
+mov r1, r10
+bl <tlsr8278_setup_analog_read+end|tlsr8278_setup_analog_write+0x0>
+b <tlsr8278_setup_analog88_check+0x72>
+== tlsr8278_setup_chip_init 202
+push {r4, r5, r6, r7, lr}
+mov r7, r8
+push {r7}
+lsls r7, r0, #0x18
+lsrs r7, r7, #0x18
+lsls r1, r1, #0x18
+lsrs r1, r1, #0x18
+mov r8, r1
+movs r3, #0x0
+ldr r2, [pc, POOL] =0x800060
+strb r3, [r2]
+adds r2, #0x1
+strb r3, [r2]
+movs r2, #0x8
+ldr r3, [pc, POOL] =0x800062
+strb r2, [r3]
+movs r3, #0xff
+ldr r2, [pc, POOL] =0x800063
+strb r3, [r2]
+adds r2, #0x1
+strb r3, [r2]
+movs r5, #0xf7
+ldr r3, [pc, POOL] =0x800065
+strb r5, [r3]
+movs r2, #0x6
+adds r3, #0x1
+strb r2, [r3]
+movs r0, #0x6
+movs r1, #0xce
+bl <tlsr8278_setup_analog_read+end|tlsr8278_setup_analog_write+0x0>
+movs r0, #0x2c
+bl <tlsr8278_setup_analog_read+0x0|tlsr8278_setup_mul_add+end>
+adds r6, r0, #0x0
+movs r0, #0x5
+bl <tlsr8278_setup_analog_read+0x0|tlsr8278_setup_mul_add+end>
+adds r4, r0, #0x0
+movs r1, #0x20
+orrs r1, r6
+lsls r1, r1, #0x18
+lsrs r1, r1, #0x18
+movs r0, #0x2c
+bl <tlsr8278_setup_analog_read+end|tlsr8278_setup_analog_write+0x0>
+movs r1, #0xdf
+ands r1, r6
+movs r0, #0x2c
+bl <tlsr8278_setup_analog_read+end|tlsr8278_setup_analog_write+0x0>
+movs r1, #0x8
+orrs r1, r4
+lsls r1, r1, #0x18
+lsrs r1, r1, #0x18
+movs r0, #0x5
+bl <tlsr8278_setup_analog_read+end|tlsr8278_setup_analog_write+0x0>
+adds r1, r5, #0x0
+ands r1, r4
+movs r0, #0x5
+bl <tlsr8278_setup_analog_read+end|tlsr8278_setup_analog_write+0x0>
+movs r0, #0x82
+movs r1, #0x65
+bl <tlsr8278_setup_analog_read+end|tlsr8278_setup_analog_write+0x0>
+movs r0, #0x34
+movs r1, #0x80
+bl <tlsr8278_setup_analog_read+end|tlsr8278_setup_analog_write+0x0>
+movs r0, #0xb
+bl <tlsr8278_setup_analog_read+0x0|tlsr8278_setup_mul_add+end>
+movs r4, #0x7f
+adds r1, r0, #0x0
+bics r1, r4
+movs r3, #0x38
+orrs r1, r3
+lsls r1, r1, #0x18
+lsrs r1, r1, #0x18
+movs r0, #0xb
+bl <tlsr8278_setup_analog_read+end|tlsr8278_setup_analog_write+0x0>
+movs r0, #0x8c
+movs r1, #0x2
+bl <tlsr8278_setup_analog_read+end|tlsr8278_setup_analog_write+0x0>
+movs r0, #0x0
+bl <tlsr8278_setup_analog_read+0x0|tlsr8278_setup_mul_add+end>
+adds r1, r4, #0x0
+ands r1, r0
+movs r0, #0x0
+bl <tlsr8278_setup_analog_read+end|tlsr8278_setup_analog_write+0x0>
+movs r0, #0x2
+movs r1, #0xa4
+bl <tlsr8278_setup_analog_read+end|tlsr8278_setup_analog_write+0x0>
+movs r0, #0x1
+movs r1, #0x4d
+bl <tlsr8278_setup_analog_read+end|tlsr8278_setup_analog_write+0x0>
+movs r3, #0x1
+cmp r8, r3
+bne <tlsr8278_setup_chip_init+0xd8>
+b <tlsr8278_setup_chip_init+0x1bc>
+movs r0, #0xa
+adds r1, r7, #0x0
+bl <tlsr8278_setup_analog_read+end|tlsr8278_setup_analog_write+0x0>
+cmp r7, #0x40
+beq <tlsr8278_setup_chip_init+0xec>
+movs r0, #0xc
+movs r1, #0xa4
+bl <tlsr8278_setup_analog_read+end|tlsr8278_setup_analog_write+0x0>
+movs r0, #0x27
+movs r1, #0x0
+bl <tlsr8278_setup_analog_read+end|tlsr8278_setup_analog_write+0x0>
+movs r0, #0x28
+movs r1, #0x0
+bl <tlsr8278_setup_analog_read+end|tlsr8278_setup_analog_write+0x0>
+movs r0, #0x29
+movs r1, #0x0
+bl <tlsr8278_setup_analog_read+end|tlsr8278_setup_analog_write+0x0>
+movs r0, #0x2a
+movs r1, #0x0
+bl <tlsr8278_setup_analog_read+end|tlsr8278_setup_analog_write+0x0>
+ldr r3, [pc, POOL] =0x4040404
+ldr r2, [pc, POOL] =0x800c40
+str r3, [r2]
+adds r2, #0x4
+str r3, [r2]
+movs r2, #0x4
+ldr r3, [pc, POOL] =0x800c48
+strb r2, [r3]
+movs r3, #0x0
+ldr r2, [pc, POOL] =0x800c20
+strb r3, [r2]
+adds r2, #0x1
+strb r3, [r2]
+ldr r3, [pc, POOL] =0x8005b5
+ldrb r1, [r3]
+movs r2, #0xc
+orrs r2, r1
+lsls r2, r2, #0x18
+lsrs r2, r2, #0x18
+strb r2, [r3]
+movs r0, #0x88
+bl <tlsr8278_setup_analog_read+0x0|tlsr8278_setup_mul_add+end>
+lsls r3, r0, #0x18
+bpl <tlsr8278_setup_chip_init+0x134>
+bl <tlsr8278_setup_analog88_check+0x0|tlsr8278_setup_suspend_stall+end>
+movs r0, #0x7f
+bl <tlsr8278_setup_analog_read+0x0|tlsr8278_setup_mul_add+end>
+movs r3, #0x1
+tst r3, r0
+bne <tlsr8278_setup_chip_init+0x19a>
+ldr r4, [pc, POOL] =0x844354 tlsr8278_idle_resumed+end|tlsr8278_setup_wake_flags+0x0
+strb r3, [r4]
+movs r0, #0x44
+bl <tlsr8278_setup_analog_read+0x0|tlsr8278_setup_mul_add+end>
+strb r0, [r4, #0x2]
+movs r0, #0x44
+bl <tlsr8278_setup_analog_read+0x0|tlsr8278_setup_mul_add+end>
+movs r3, #0xa
+ands r0, r3
+cmp r0, #0x8
+beq <tlsr8278_setup_chip_init+0x1b6>
+bl <tlsr8278_setup_get_32k_tick+0x0|tlsr8278_setup_read_analog40+end>
+ldr r3, [pc, POOL] =0x844358 tlsr8278_setup_wake_flags+0x4
+ldr r3, [r3]
+bl <tlsr8278_setup_call_via_r3+0x0|tlsr8278_setup_chip_init+end>
+ldr r3, [pc, POOL] =0x800740
+str r0, [r3]
+adds r3, #0xa
+ldrb r1, [r3]
+movs r2, #0xa
+orrs r2, r1
+lsls r2, r2, #0x18
+lsrs r2, r2, #0x18
+strb r2, [r3]
+ldr r3, [pc, POOL] =0x800748
+ldrb r1, [r3]
+movs r2, #0x4
+orrs r2, r1
+lsls r2, r2, #0x18
+lsrs r2, r2, #0x18
+strb r2, [r3]
+pop {r2}
+mov r8, r2
+pop {r4, r5, r6, r7, pc}
+ldr r4, [pc, POOL] =0x844354 tlsr8278_idle_resumed+end|tlsr8278_setup_wake_flags+0x0
+ldrb r3, [r4]
+cmp r3, #0x0
+bne <tlsr8278_setup_chip_init+0x152>
+ldr r3, [pc, POOL] =0x80074a
+ldrb r1, [r3]
+movs r2, #0xa
+orrs r2, r1
+lsls r2, r2, #0x18
+lsrs r2, r2, #0x18
+strb r2, [r3]
+bl <tlsr8278_setup_chip_init_tail+0x0|tlsr8278_setup_pwm_pc3_until_moving+end>
+b <tlsr8278_setup_chip_init+0x186>
+movs r3, #0x1
+strb r3, [r4, #0x1]
+b <tlsr8278_setup_chip_init+0x168>
+movs r0, #0x2d
+bl <tlsr8278_setup_analog_read+0x0|tlsr8278_setup_mul_add+end>
+movs r3, #0x40
+adds r1, r0, #0x0
+orrs r1, r3
+lsls r1, r1, #0x18
+lsrs r1, r1, #0x18
+movs r0, #0x2d
+bl <tlsr8278_setup_analog_read+end|tlsr8278_setup_analog_write+0x0>
+b <tlsr8278_setup_chip_init+0xd8>
+== tlsr8278_setup_chip_init_tail 80
+push {lr}
+ldr r3, [pc, POOL] =0x842a2c tlsr8278_setup_vars+0x10
+ldrb r3, [r3, #0x9]
+cmp r3, #0x0
+beq <tlsr8278_setup_chip_init_tail+0x52>
+movs r0, #0x3b
+bl <tlsr8278_setup_analog_read+0x0|tlsr8278_setup_mul_add+end>
+cmp r0, #0x0
+bne <tlsr8278_setup_chip_init_tail+0xaa>
+movs r0, #0x3b
+bl <tlsr8278_setup_analog_read+0x0|tlsr8278_setup_mul_add+end>
+movs r3, #0x1
+adds r1, r0, #0x0
+orrs r1, r3
+lsls r1, r1, #0x18
+lsrs r1, r1, #0x18
+movs r0, #0x3b
+bl <tlsr8278_setup_analog_read+end|tlsr8278_setup_analog_write+0x0>
+bl <tlsr8278_setup_pwm_pc3_until_moving+0x0|tlsr8278_setup_read_word_4c+end>
+bl <tlsr8278_setup_pwm_pc3_10ms+end|tlsr8278_setup_read_word_4c+0x0>
+movs r3, #0xff
+tst r3, r0
+bne <tlsr8278_setup_chip_init_tail+0x60>
+ldr r2, [pc, POOL] =0x80063e
+ldrh r3, [r2]
+cmp r3, #0x0
+bne <tlsr8278_setup_chip_init_tail+0x84>
+ldr r3, [pc, POOL] =0x842a58 tlsr8278_setup_boot_vars+0x4
+ldr r2, [r3]
+ldr r3, [pc, POOL] =0x842a6c tlsr8278_setup_boot_vars+0x18
+str r2, [r3]
+bl <tlsr8278_setup_flash_is_zbit+0x0|tlsr8278_setup_flash_read_jedec_id+end>
+ldr r3, [pc, POOL] =0x842a25 tlsr8278_setup_vars+0x9
+strb r0, [r3]
+pop {pc}
+bl <tlsr8278_setup_seq_c6+0x0|tlsr8278_setup_seq_c7+end>
+bl <tlsr8278_setup_pwm_pc3_10ms+end|tlsr8278_setup_read_word_4c+0x0>
+movs r3, #0xff
+tst r3, r0
+beq <tlsr8278_setup_chip_init_tail+0x38>
+ldr r3, [pc, POOL] =0x842a1c core_idle_lock_timeout+end|tlsr8278_setup_vars+0x0
+ldrb r2, [r3, #0x2]
+ldrb r1, [r3, #0x3]
+lsls r1, r1, #0x8
+orrs r1, r2
+beq <tlsr8278_setup_chip_init_tail+0x38>
+lsls r0, r0, #0x18
+lsrs r0, r0, #0x8
+ldr r2, [pc, POOL] =0x4170000
+adds r0, r0, r2
+lsrs r2, r0, #0x10
+strb r2, [r3]
+lsrs r0, r0, #0x18
+strb r0, [r3, #0x1]
+ldr r2, [pc, POOL] =0x80063e
+ldrh r3, [r2]
+cmp r3, #0x0
+beq <tlsr8278_setup_chip_init_tail+0x40>
+ldr r1, [pc, POOL] =0x842a54 tlsr8278_setup_boot_vars+0x0|tlsr8278_setup_vars+end
+ldr r1, [r1]
+asrs r1, r1, #0x2
+lsls r1, r1, #0x3
+movs r0, #0x7
+ands r3, r0
+orrs r3, r1
+lsls r3, r3, #0x10
+lsrs r3, r3, #0x10
+strh r3, [r2]
+ldr r1, [pc, POOL] =0xffffa55a
+ldr r2, [pc, POOL] =0x840014
+strh r1, [r2]
+adds r2, #0x2
+strh r3, [r2]
+movs r2, #0x0
+ldr r3, [pc, POOL] =0x842a6c tlsr8278_setup_boot_vars+0x18
+str r2, [r3]
+b <tlsr8278_setup_chip_init_tail+0x48>
+ldr r0, [pc, POOL] =0x1770 tlsr8278_setup_flash_read_jedec_id+0x18
+bl <tlsr8278_setup_flash_read_cmd+end|tlsr8278_setup_sleep_us+0x0>
+b <tlsr8278_setup_chip_init_tail+0x56>
+== tlsr8278_setup_clock_init 13
+push {lr}
+lsls r0, r0, #0x18
+lsrs r0, r0, #0x18
+ldr r3, [pc, POOL] =0x800066
+strb r0, [r3]
+ldr r3, [pc, POOL] =0x842a20 tlsr8278_setup_vars+0x4
+strb r0, [r3]
+ldr r3, [pc, POOL] =0x844354 tlsr8278_idle_resumed+end|tlsr8278_setup_wake_flags+0x0
+ldrb r3, [r3]
+cmp r3, #0x0
+bne <tlsr8278_setup_clock_init+0x1a>
+bl <tlsr8278_setup_scale_count+end|tlsr8278_setup_seq_c7+0x0>
+pop {pc}
+== tlsr8278_setup_flash_is_zbit 23
+push {lr}
+bl <tlsr8278_setup_flash_read_jedec_id+0x0|tlsr8278_setup_seq_c6+end>
+ldr r2, [pc, POOL] =0xffebcda2
+adds r3, r0, r2
+cmp r3, #0x0
+beq <tlsr8278_setup_flash_is_zbit+0x2c>
+ldr r2, [pc, POOL] =0xffeccda2
+adds r3, r0, r2
+cmp r3, #0x0
+beq <tlsr8278_setup_flash_is_zbit+0x2c>
+ldr r3, [pc, POOL] =0xffedcda2
+adds r2, r0, r3
+rsbs r3, r2, #0
+adcs r2, r3
+ldr r3, [pc, POOL] =0xffeecda2
+adds r0, r0, r3
+rsbs r3, r0, #0
+adcs r3, r0
+adds r0, r2, #0x0
+orrs r0, r3
+pop {pc}
+movs r0, #0x1
+b <tlsr8278_setup_flash_is_zbit+0x2a>
+== tlsr8278_setup_flash_read_cmd 79
+push {r4, r5, r6, r7, lr}
+mov r7, r10
+mov r6, r8
+push {r6, r7}
+mov r10, r1
+ldr r6, [sp, #0x1c]
+ldr r4, [sp, #0x20]
+lsls r0, r0, #0x18
+lsrs r0, r0, #0x18
+lsls r2, r2, #0x18
+lsrs r7, r2, #0x18
+lsls r5, r3, #0x18
+lsrs r5, r5, #0x18
+ldr r3, [pc, POOL] =0x800643
+ldrb r2, [r3]
+mov r8, r2
+movs r2, #0x0
+strb r2, [r3]
+bl <tlsr8278_setup_flash_send_addr+end|tlsr8278_setup_flash_send_cmd+0x0>
+cmp r7, #0x0
+bne <tlsr8278_setup_flash_read_cmd+0x9a>
+cmp r5, #0x0
+beq <tlsr8278_setup_flash_read_cmd+0x4c>
+movs r0, #0x0
+ldr r2, [pc, POOL] =0x80000c
+mov r12, r2
+movs r7, #0x0
+ldr r1, [pc, POOL] =0x80000d
+movs r2, #0x10
+mov r3, r12
+strb r7, [r3]
+ldrb r3, [r1]
+tst r2, r3
+bne <tlsr8278_setup_flash_read_cmd+0x40>
+adds r0, #0x1
+cmp r0, r5
+blt <tlsr8278_setup_flash_read_cmd+0x3c>
+movs r2, #0x0
+ldr r3, [pc, POOL] =0x80000c
+strb r2, [r3]
+ldr r0, [pc, POOL] =0x80000d
+movs r1, #0x10
+ldr r2, [pc, POOL] =0x80000d
+ldrb r3, [r0]
+tst r1, r3
+bne <tlsr8278_setup_flash_read_cmd+0x56>
+movs r3, #0xa
+strb r3, [r2]
+movs r1, #0x10
+ldrb r3, [r2]
+tst r1, r3
+bne <tlsr8278_setup_flash_read_cmd+0x64>
+cmp r4, #0x0
+beq <tlsr8278_setup_flash_read_cmd+0x86>
+movs r0, #0x0
+ldr r5, [pc, POOL] =0x80000c
+ldr r1, [pc, POOL] =0x80000d
+movs r2, #0x10
+ldrb r3, [r5]
+strb r3, [r6, r0]
+ldrb r3, [r1]
+tst r2, r3
+bne <tlsr8278_setup_flash_read_cmd+0x7a>
+adds r0, #0x1
+cmp r0, r4
+bne <tlsr8278_setup_flash_read_cmd+0x76>
+movs r2, #0x1
+ldr r3, [pc, POOL] =0x80000d
+strb r2, [r3]
+ldr r3, [pc, POOL] =0x800643
+mov r2, r8
+strb r2, [r3]
+pop {r2, r3}
+mov r8, r2
+mov r10, r3
+pop {r4, r5, r6, r7, pc}
+mov r0, r10
+bl <tlsr8278_setup_clock_init+end|tlsr8278_setup_flash_send_addr+0x0>
+b <tlsr8278_setup_flash_read_cmd+0x2c>
+== tlsr8278_setup_flash_read_jedec_id 16
+push {lr}
+sub sp, #0xc
+movs r3, #0x0
+str r3, [sp, #0x8]
+add r3, sp, #0x8
+str r3, [sp]
+movs r3, #0x3
+str r3, [sp, #0x4]
+movs r0, #0x9f
+movs r1, #0x0
+movs r2, #0x0
+movs r3, #0x0
+bl <tlsr8278_setup_flash_read_cmd+0x0|tlsr8278_setup_flash_send_cmd+end>
+ldr r0, [sp, #0x8]
+add sp, #0xc
+pop {pc}
+== tlsr8278_setup_flash_send_cmd 16
+push {r4, r5, lr}
+adds r5, r0, #0x0
+ldr r4, [pc, POOL] =0x80000d
+movs r3, #0x1
+strb r3, [r4]
+movs r0, #0x1
+bl <tlsr8278_setup_flash_read_cmd+end|tlsr8278_setup_sleep_us+0x0>
+movs r3, #0x0
+strb r3, [r4]
+ldr r3, [pc, POOL] =0x80000c
+strb r5, [r3]
+movs r2, #0x10
+ldrb r3, [r4]
+tst r2, r3
+bne <tlsr8278_setup_flash_send_cmd+0x1a>
+pop {r4, r5, pc}
+== tlsr8278_setup_read_word_4c 8
+ldr r3, [pc, POOL] =0x800074
+movs r2, #0x62
+strb r2, [r3]
+ldr r2, [pc, POOL] =0x80004c
+ldr r0, [r2]
+movs r2, #0x0
+strb r2, [r3]
+bx lr
+== tlsr8278_setup_seq_c6 32
+push {r4, lr}
+movs r0, #0x30
+movs r1, #0x60
+bl <tlsr8278_setup_analog_read+end|tlsr8278_setup_analog_write+0x0>
+movs r0, #0xc6
+movs r1, #0xf6
+bl <tlsr8278_setup_analog_read+end|tlsr8278_setup_analog_write+0x0>
+movs r0, #0xc6
+movs r1, #0xf7
+bl <tlsr8278_setup_analog_read+end|tlsr8278_setup_analog_write+0x0>
+movs r4, #0x40
+movs r0, #0xcf
+bl <tlsr8278_setup_analog_read+0x0|tlsr8278_setup_mul_add+end>
+tst r4, r0
+beq <tlsr8278_setup_seq_c6+0x1c>
+movs r0, #0xc9
+bl <tlsr8278_setup_analog_read+0x0|tlsr8278_setup_mul_add+end>
+adds r1, r0, #0x0
+movs r0, #0x32
+bl <tlsr8278_setup_analog_read+end|tlsr8278_setup_analog_write+0x0>
+movs r0, #0xca
+bl <tlsr8278_setup_analog_read+0x0|tlsr8278_setup_mul_add+end>
+adds r1, r0, #0x0
+movs r0, #0x31
+bl <tlsr8278_setup_analog_read+end|tlsr8278_setup_analog_write+0x0>
+movs r0, #0xc6
+movs r1, #0xf6
+bl <tlsr8278_setup_analog_read+end|tlsr8278_setup_analog_write+0x0>
+movs r0, #0x30
+movs r1, #0x20
+bl <tlsr8278_setup_analog_read+end|tlsr8278_setup_analog_write+0x0>
+pop {r4, pc}
+== tlsr8278_setup_seq_c7 42
+push {lr}
+movs r0, #0xc8
+movs r1, #0x80
+bl <tlsr8278_setup_analog_read+end|tlsr8278_setup_analog_write+0x0>
+movs r0, #0x30
+bl <tlsr8278_setup_analog_read+0x0|tlsr8278_setup_mul_add+end>
+movs r3, #0x80
+rsbs r3, r3, #0
+orrs r3, r0
+lsls r1, r3, #0x18
+lsrs r1, r1, #0x18
+movs r0, #0x30
+bl <tlsr8278_setup_analog_read+end|tlsr8278_setup_analog_write+0x0>
+movs r0, #0xc7
+movs r1, #0xe
+bl <tlsr8278_setup_analog_read+end|tlsr8278_setup_analog_write+0x0>
+movs r0, #0xc7
+movs r1, #0xf
+bl <tlsr8278_setup_analog_read+end|tlsr8278_setup_analog_write+0x0>
+movs r0, #0xcf
+bl <tlsr8278_setup_analog_read+0x0|tlsr8278_setup_mul_add+end>
+lsls r3, r0, #0x18
+bpl <tlsr8278_setup_seq_c7+0x30>
+movs r0, #0xcb
+bl <tlsr8278_setup_analog_read+0x0|tlsr8278_setup_mul_add+end>
+adds r1, r0, #0x0
+movs r0, #0x33
+bl <tlsr8278_setup_analog_read+end|tlsr8278_setup_analog_write+0x0>
+movs r0, #0x30
+bl <tlsr8278_setup_analog_read+0x0|tlsr8278_setup_mul_add+end>
+movs r1, #0x7f
+ands r1, r0
+movs r0, #0x30
+bl <tlsr8278_setup_analog_read+end|tlsr8278_setup_analog_write+0x0>
+movs r0, #0xc7
+movs r1, #0xe
+bl <tlsr8278_setup_analog_read+end|tlsr8278_setup_analog_write+0x0>
+movs r0, #0x33
+bl <tlsr8278_setup_analog_read+0x0|tlsr8278_setup_mul_add+end>
+ldr r3, [pc, POOL] =0x842a38 tlsr8278_setup_vars+0x1c
+strb r0, [r3]
+pop {pc}
+== tlsr8278_setup_sleep_us 8
+ldr r2, [pc, POOL] =0x800740
+ldr r1, [r2]
+lsls r0, r0, #0x4
+ldr r3, [r2]
+subs r3, r3, r1
+cmp r0, r3
+bhs <tlsr8278_setup_sleep_us+0x6>
+bx lr
+== tlsr8278_startup 144
+movs r2, #0x0
+movs r3, #0x6e
+adds r2, #0x1
+cmp r2, r3
+ble <tlsr8278_startup+0x4>
+ldr r0, [pc, POOL] =0x800060
+ldr r1, [pc, POOL] =0xff000000
+str r1, [r0]
+lsrs r1, r1, #0x18
+strb r1, [r0, #0x4]
+strb r1, [r0, #0x5]
+ldr r0, [pc, POOL] =0x7f tlsr8278_startup+0x5f
+ldr r1, [pc, POOL] =0x8000b8
+adds r2, r0, #0x0
+strb r2, [r1]
+movs r2, #0x40
+strb r2, [r1, #0x2]
+ldrb r2, [r1, #0x2]
+lsls r2, r2, #0x1f
+lsrs r2, r2, #0x1f
+cmp r2, #0x1
+beq <tlsr8278_startup+0x22>
+ldrb r2, [r1, #0x1]
+movs r3, #0x1
+ands r3, r2
+cmp r3, #0x1
+bne <tlsr8278_startup+0xb0>
+ldr r0, [pc, POOL] =0x800608
+ldr r1, [pc, POOL] =0xd0 tlsr8278_startup+0xb0
+ldr r2, [pc, POOL] =0x1d00 arch_cpu_idle+0x40
+movs r4, #0x1
+lsls r4, r4, #0x18
+cmp r1, r2
+bge <tlsr8278_startup+0xb0>
+adds r5, r4, #0x0
+adds r5, r5, r1
+str r5, [r0]
+ldr r3, [r0]
+asrs r3, r3, #0x18
+cmp r3, #0x0
+bne <tlsr8278_startup+0x4a>
+adds r1, #0x10
+b <tlsr8278_startup+0x40>
+movs r2, #0x0
+movs r3, #0x6e
+adds r2, #0x1
+cmp r2, r3
+ble <tlsr8278_startup+0x7c>
+ldr r0, [pc, POOL] =0x800060
+movs r1, #0xff
+lsls r1, r1, #0x18
+str r1, [r0]
+lsrs r1, r1, #0x18
+strb r1, [r0, #0x4]
+strb r1, [r0, #0x5]
+ldr r1, [pc, POOL] =0x800620
+movs r0, #0x0
+str r0, [r1, #0x18]
+ldrb r0, [r1]
+movs r2, #0x40
+orrs r0, r2
+strb r0, [r1]
+movs r0, #0xb8
+strb r0, [r1, #0x1]
+movs r0, #0x85
+strb r0, [r1, #0x2]
+b <tlsr8278_startup+0x0>
+movs r2, #0x14
+ldrb r1, [r2]
+movs r0, #0x5a
+cmp r0, r1
+bne <tlsr8278_startup+0xd2>
+movs r2, #0x15
+ldrb r1, [r2]
+movs r0, #0xa5
+cmp r0, r1
+bne <tlsr8278_startup+0xd2>
+movs r2, #0x16
+ldrb r1, [r2]
+ldr r0, [pc, POOL] =0x80063e
+strb r1, [r0]
+movs r2, #0x17
+ldrb r1, [r2]
+strb r1, [r0, #0x1]
+ldr r0, [pc, POOL] =0x80000c
+movs r1, #0x0
+strb r1, [r0, #0x1]
+movs r1, #0xab
+strb r1, [r0]
+movs r2, #0x0
+movs r3, #0x6
+adds r2, #0x1
+cmp r2, r3
+ble <tlsr8278_startup+0xe0>
+movs r1, #0x1
+strb r1, [r0, #0x1]
+ldr r0, [pc, POOL] =0xffffffff
+ldr r1, [pc, POOL] =0x842800 __data_region_start+0x0|__data_start+0x0|__ramfunc_end+0x0|__ramfunc_region_start+0x0|__ramfunc_start+0x0|_image_ram_start=|suspended_since+0x0
+ldr r2, [pc, POOL] =0x842820 last_tapped+end|other_ok+0x0
+cmp r1, r2
+bge <tlsr8278_startup+0xfa>
+str r0, [r1]
+adds r1, #0x4
+b <tlsr8278_startup+0xf0>
+ldr r0, [pc, POOL] =0x12 __start+0x12
+<unknown>
+ldr r0, [pc, POOL] =0x846780 z_interrupt_stacks+end|z_main_stack+0x0
+mov sp, r0
+ldr r0, [pc, POOL] =0x13 __start+0x13
+<unknown>
+ldr r0, [pc, POOL] =0x846780 z_interrupt_stacks+end|z_main_stack+0x0
+mov sp, r0
+movs r0, #0x0
+ldr r1, [pc, POOL] =0x842f70 __bss_start+0x0|last_avg+0x0
+ldr r2, [pc, POOL] =0x844dd0 __bss_end=|_k_thread_stack_cidoo_ble+0x0|mutex_lock+0x0|sem_lock+0x0|timer_lock+0x0|z_sys_post_kernel+end
+cmp r1, r2
+bge <tlsr8278_startup+0x11a>
+str r0, [r1]
+adds r1, #0x4
+b <tlsr8278_startup+0x110>
+ldr r1, [pc, POOL] =0x841d00 _ictag_start_=
+ldr r2, [pc, POOL] =0x841e00 _ictag_end_=
+cmp r1, r2
+bge <tlsr8278_startup+0x128>
+str r0, [r1]
+adds r1, #0x4
+b <tlsr8278_startup+0x11e>
+ldr r1, [pc, POOL] =0x80060c
+ldr r0, [pc, POOL] =0x1d __start+0x1d
+strb r0, [r1]
+adds r0, #0x1
+strb r0, [r1, #0x1]
+ldr r1, [pc, POOL] =0x1c8b4 __event_subscriptions_end+0x0|__rodata_region_end+0x0|zmk_event_sub_studio_rpczmk_studio_core_lock_state_changed+end
+ldr r2, [pc, POOL] =0x842800 __data_region_start+0x0|__data_start+0x0|__ramfunc_end+0x0|__ramfunc_region_start+0x0|__ramfunc_start+0x0|_image_ram_start=|suspended_since+0x0
+ldr r3, [pc, POOL] =0x842f68 __data_region_end+0x0|_zmk_rpc_subsystem_list_end+0x0|keymap_subsystem+end
+cmp r2, r3
+bge <tlsr8278_startup+0x146>
+ldr r0, [r1]
+str r0, [r2]
+adds r1, #0x4
+adds r2, #0x4
+b <tlsr8278_startup+0x138>
+bl <z_cstart+0x0|z_init_cpu+end>
+b <tlsr8278_startup+0x14a>
+== trim_analog_read 12
+ldr r1, [pc, POOL] =0x8000b8
+strb r0, [r1]
+movs r0, #0x40
+strb r0, [r1, #0x2]
+ldrb r0, [r1, #0x2]
+lsls r0, r0, #0x1f
+bne <trim_analog_read+0x8>
+ldrb r0, [r1, #0x1]
+movs r2, #0x0
+strb r2, [r1, #0x2]
+bx lr
+mov r8, r8
+== trim_analog_write 12
+ldr r2, [pc, POOL] =0x8000b8
+strb r0, [r2]
+strb r1, [r2, #0x1]
+movs r0, #0x60
+strb r0, [r2, #0x2]
+ldrb r0, [r2, #0x2]
+lsls r0, r0, #0x1f
+bne <trim_analog_write+0xa>
+movs r0, #0x0
+strb r0, [r2, #0x2]
+bx lr
+mov r8, r8
+== trim_get 60
+push {r3, r4, r5, r6, r7, lr}
+ldr r1, [pc, POOL] =0x800643
+ldrb r5, [r1]
+movs r6, #0x0
+strb r6, [r1]
+lsls r1, r5, #0x1f
+bne <trim_get+0x22>
+movs r0, #0x9
+bl <trim_analog_read+0x0|trim_analog_write+end>
+ldr r4, [pc, POOL] =0x844784 jedec_id_read+0x0|last_announce_cycle+end
+strb r0, [r4, #0x2]
+movs r0, #0xc
+bl <trim_analog_read+0x0|trim_analog_write+end>
+strb r0, [r4, #0x3]
+b <trim_get+0x72>
+mov r0, lr
+ldr r7, [pc, POOL] =0x844600 z_tc32_irq_lock_depth+0x0|z_tc32_irq_lock_owner+end
+ldr r1, [r7]
+cmp r1, #0x7
+bhi <trim_get+0x34>
+lsls r2, r1, #0x2
+ldr r3, [pc, POOL] =0x8445e0 settings_save_dst+end|z_tc32_irq_lock_owner+0x0
+str r0, [r3, r2]
+b <trim_get+0x38>
+ldr r2, [pc, POOL] =0x844608 z_tc32_irq_lock_max_depth+end|z_tc32_irq_lock_overflow_ra+0x0
+str r0, [r2]
+adds r0, r1, #0x1
+str r0, [r7]
+ldr r1, [r7]
+ldr r0, [pc, POOL] =0x844604 z_tc32_irq_lock_depth+end|z_tc32_irq_lock_max_depth+0x0
+ldr r2, [r0]
+cmp r1, r2
+bls <trim_get+0x4a>
+ldr r1, [r7]
+str r1, [r0]
+movs r0, #0x9
+bl <trim_analog_read+0x0|trim_analog_write+end>
+ldr r4, [pc, POOL] =0x844784 jedec_id_read+0x0|last_announce_cycle+end
+strb r0, [r4, #0x2]
+movs r0, #0xc
+bl <trim_analog_read+0x0|trim_analog_write+end>
+strb r0, [r4, #0x3]
+ldr r0, [r7]
+cmp r0, #0x0
+beq <trim_get+0x72>
+ldr r0, [r7]
+subs r0, r0, #0x1
+str r0, [r7]
+cmp r0, #0x7
+bhi <trim_get+0x72>
+lsls r0, r0, #0x2
+ldr r1, [pc, POOL] =0x8445e0 settings_save_dst+end|z_tc32_irq_lock_owner+0x0
+str r6, [r1, r0]
+ldr r0, [pc, POOL] =0x800643
+strb r5, [r0]
+pop {r3, r4, r5, r6, r7}
+pop {r0}
+mov lr, r0
+bx lr
+mov r8, r8
+== trim_set 74
+push {r1, r2, r3, r4, r5, r6, r7, lr}
+movs r4, r1
+movs r5, r0
+ldr r0, [pc, POOL] =0x800643
+ldrb r1, [r0]
+movs r3, #0x0
+str r3, [sp, #0x4]
+strb r3, [r0]
+movs r7, #0x1
+str r1, [sp, #0x8]
+ands r7, r1
+beq <trim_set+0x40>
+mov r2, lr
+ldr r0, [pc, POOL] =0x844600 z_tc32_irq_lock_depth+0x0|z_tc32_irq_lock_owner+end
+ldr r1, [r0]
+cmp r1, #0x7
+bhi <trim_set+0x2a>
+lsls r3, r1, #0x2
+ldr r6, [pc, POOL] =0x8445e0 settings_save_dst+end|z_tc32_irq_lock_owner+0x0
+str r2, [r6, r3]
+b <trim_set+0x2e>
+ldr r3, [pc, POOL] =0x844608 z_tc32_irq_lock_max_depth+end|z_tc32_irq_lock_overflow_ra+0x0
+str r2, [r3]
+adds r1, r1, #0x1
+str r1, [r0]
+ldr r2, [r0]
+ldr r1, [pc, POOL] =0x844604 z_tc32_irq_lock_depth+end|z_tc32_irq_lock_max_depth+0x0
+ldr r3, [r1]
+cmp r2, r3
+bls <trim_set+0x40>
+ldr r0, [r0]
+str r0, [r1]
+movs r6, #0x9
+movs r0, r6
+bl <trim_analog_read+0x0|trim_analog_write+end>
+movs r1, #0x8f
+ands r1, r0
+lsls r0, r5, #0x1d
+lsrs r0, r0, #0x19
+adds r1, r1, r0
+movs r0, r6
+bl <trim_analog_write+0x0|trim_get+end>
+movs r0, #0x7
+ands r4, r0
+movs r5, #0xc
+movs r0, r5
+bl <trim_analog_read+0x0|trim_analog_write+end>
+movs r1, #0xf8
+ands r1, r0
+adds r1, r1, r4
+movs r0, r5
+bl <trim_analog_write+0x0|trim_get+end>
+cmp r7, #0x0
+beq <trim_set+0x8e>
+ldr r0, [pc, POOL] =0x844600 z_tc32_irq_lock_depth+0x0|z_tc32_irq_lock_owner+end
+ldr r1, [r0]
+cmp r1, #0x0
+beq <trim_set+0x8e>
+ldr r1, [r0]
+subs r1, r1, #0x1
+str r1, [r0]
+cmp r1, #0x7
+bhi <trim_set+0x8e>
+lsls r0, r1, #0x2
+ldr r1, [pc, POOL] =0x8445e0 settings_save_dst+end|z_tc32_irq_lock_owner+0x0
+ldr r2, [sp, #0x4]
+str r2, [r1, r0]
+ldr r0, [pc, POOL] =0x800643
+ldr r1, [sp, #0x8]
+strb r1, [r0]
+pop {r1, r2, r3, r4, r5, r6, r7}
+pop {r0}
+mov lr, r0
+bx lr
+== z_cstart 19
+movs r0, #0x0
+bl <z_sys_init_run_level+0x0>
+ldr r0, [pc, POOL] =0x844aac _thread_dummy+0x0|k_sys_work_q+end
+bl <z_dummy_thread_init+0x0|z_setup_new_thread+end>
+bl <soc_early_init_hook+0x0>
+bl <board_early_init_hook+0x0|memcmp+end>
+ldr r4, [pc, POOL] =0x1a91c __app_shmem_regions_end+0x0|__app_shmem_regions_start+0x0|_k_kernel_init_post_entry_list_start+0x0|_k_kernel_init_pre_entry_list_end+0x0|_k_kernel_init_pre_entry_list_start+0x0|_k_p4wq_initparam_list_end+0x0|_k_p4wq_initparam_list_start+0x0|_kernel_init_post_sys_work_q_init+0x0|_sw_isr_table+end
+ldr r5, [pc, POOL] =0x1a91c __app_shmem_regions_end+0x0|__app_shmem_regions_start+0x0|_k_kernel_init_post_entry_list_start+0x0|_k_kernel_init_pre_entry_list_end+0x0|_k_kernel_init_pre_entry_list_start+0x0|_k_p4wq_initparam_list_end+0x0|_k_p4wq_initparam_list_start+0x0|_kernel_init_post_sys_work_q_init+0x0|_sw_isr_table+end
+cmp r4, r5
+bhs <z_cstart+0x24>
+ldm r4!, {r0}
+bl <z_cstart+end=d4d44700>
+b <z_cstart+0x18>
+movs r0, #0x1
+bl <z_sys_init_run_level+0x0>
+movs r0, #0x2
+bl <z_sys_init_run_level+0x0>
+bl <prepare_multithreading+0x0|switch_to_main_thread+end>
+bl <switch_to_main_thread+0x0>
+== z_dummy_thread_init 16
+ldrb r1, [r0, #0xe]
+movs r2, #0x7c
+strb r1, [r0, r2]
+movs r1, #0x0
+str r1, [r0, #0x78]
+str r1, [r0, #0x74]
+str r1, [r0, #0x70]
+movs r2, #0x1
+strh r2, [r0, #0xc]
+strb r2, [r0, #0x10]
+str r1, [r0, #0x6c]
+str r1, [r0, #0x68]
+ldr r1, [pc, POOL] =0x844964 _kernel+0x0|z_idle_threads+end
+str r0, [r1, #0x8]
+bx lr
+mov r8, r8
+== z_sys_init_run_level 24
+push {r4, r5, r7, lr}
+lsls r0, r0, #0x2
+ldr r1, [pc, POOL] =0x1c028 z_sys_init_run_level.levels+0x0
+ldr r4, [r1, r0]
+adds r0, r1, r0
+ldr r5, [r0, #0x4]
+cmp r4, r5
+bhs <z_sys_init_run_level+0x2c>
+ldr r0, [r4, #0x4]
+cmp r0, #0x0
+beq <z_sys_init_run_level+0x22>
+ldrb r1, [r0, #0x18]
+lsls r1, r1, #0x1f
+bne <z_sys_init_run_level+0x28>
+bl <do_device_init+0x0|pb_decode_fixed32+end>
+b <z_sys_init_run_level+0x28>
+ldr r0, [r4]
+bl <z_sys_init_run_level+end=d4d44700>
+adds r4, #0x8
+b <z_sys_init_run_level+0xc>
+pop {r4, r5, r7}
+pop {r0}
+mov lr, r0
+bx lr

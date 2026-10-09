@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+file_format: "1"
+id: cidoo_v21
+name: CIDOO V21
+type: board
+arch: tc32
+url: https://cidootech.com/products/cidoo-v21
+features:
+  - keys
+  - encoder

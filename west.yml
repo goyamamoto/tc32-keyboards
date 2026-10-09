@@ -1,0 +1,34 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# tc32-keyboards' west manifest: zmk-tc32 (ZMK with the TLSR8278 module) at a pinned commit,
+# whose own manifest brings zephyr-tc32 (Zephyr with the TC32 port); nanopb and
+# zmk-studio-messages for ZMK Studio.
+#
+#   west init -m https://github.com/goyamamoto/tc32-keyboards <workspace>
+#   cd <workspace> && west update
+#
+# gives <workspace>/tc32-keyboards (this repository), zmk/, zephyr/, modules/lib/nanopb and
+# modules/zmk-studio-messages: the layout build.sh expects (README.md, Build).
+manifest:
+  remotes:
+    - name: goyamamoto
+      url-base: https://github.com/goyamamoto
+    - name: zephyrproject-rtos
+      url-base: https://github.com/zephyrproject-rtos
+    - name: zmkfirmware
+      url-base: https://github.com/zmkfirmware
+  projects:
+    - name: zmk-tc32
+      remote: goyamamoto
+      path: zmk
+      revision: d2bdf11b0554347f64f609f7c04bf24eb30d55c1
+      import: app/west.yml
+    - name: nanopb
+      remote: zephyrproject-rtos
+      path: modules/lib/nanopb
+      revision: 5499fd4c9a478f8139eeb07a82c3b4468d6067f7
+    - name: zmk-studio-messages
+      remote: zmkfirmware
+      path: modules/zmk-studio-messages
+      revision: 6cb4c283e76209d59c45fbcb218800cd19e9339d
+  self:
+    path: tc32-keyboards

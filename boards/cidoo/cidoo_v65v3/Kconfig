@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+config STATUS_DISPLAY_CIDOO_V65V3
+	bool
+	default y
+	depends on TLSR_STATUS_DISPLAY && LED_DRIVER_SPI && BOARD_CIDOO_V65V3
+	help
+	  v65v3_status.c: the status display on the V65 V3's LEDs through
+	  the backlight driver's overlay - the battery on 1 to 0, the CPU left
+	  over on Z to /, the Bluetooth profiles on Q, W and E, the 2.4G link
+	  on R, the Windows or Mac mode on A or S.

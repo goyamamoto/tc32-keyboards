@@ -1,0 +1,86 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+CONFIG_LLVM_USE_LLD=y
+# The RAM-resident code and the 0x900 cache the boot ROM needs, and no more:
+# the SRAM is 32 KB (cidoo_v21.dts). The linker fails if it is too small.
+CONFIG_TC32_BOOT_MIRROR_SIZE=0x2800
+CONFIG_GPIO=y
+
+# Knob
+CONFIG_EC11=y
+CONFIG_EC11_TRIGGER_GLOBAL_THREAD=y
+
+# USB through the TLSR8278 usb_dc driver (built, not yet run on hardware).
+# No Bluetooth for the TLSR8278 yet.
+CONFIG_ZMK_USB=y
+CONFIG_ZMK_BLE=n
+
+# The image polls the USB controller only; the behaviour of the USB interrupt
+# lines is not documented and not measured on hardware. Turn on once measured.
+CONFIG_USB_DC_TELINK_B87_IRQ_LINES=n
+
+# The Timer2 watchdog from the first instructions of the SoC setup, with the
+# boot guard's period; the guard takes it over at POST_KERNEL.
+CONFIG_SOC_TLSR8278_EARLY_WATCHDOG_MS=4000
+
+# Flash access for the USB OTA receiver (tc32/src/tlsr_usb_ota.c).
+CONFIG_FLASH=y
+
+# The kernel's timeouts, the USB poll's every 1 ms among them, run in the
+# system timer interrupt from the flash, a few hundred microseconds when the
+# cache misses, and hold back the backlight's slot interrupt when they run
+# across its match (src/led_key_matrix.c). 32-bit timeouts (the TLSR827x
+# SoC's default; ZMK's own matrix driver, which needs 64-bit ones, is not
+# used here) and no time slicing (no two threads of one priority need to
+# share the CPU) shorten that work: in the emulator the CPU is busy 36 % of
+# the time instead of 44 %, and the slots the kernel cuts short are fewer.
+CONFIG_TIMEOUT_64BIT=n
+CONFIG_TIMESLICING=n
+
+# The flash supply trim (analog 0x09, 0x0c, not documented) is set once at boot
+# (tlsr_spi_flash_trim_calib(), tc32/src/tlsr_spi_flash.c), which changes
+# nothing unless the calibration bytes at 0x771c0 hold a value or the flash is
+# Zbit, and raised at OTA start on a Zbit flash. No other driver trims
+# the supply (the flash node uses telink,tlsr-spi-flash).
+
+# The configuration descriptor's attributes and power (a0 fa): remote wakeup
+# (a key wakes the host from sleep, src/usb_suspend.c), bus-powered as the
+# controller's own GET_STATUS answer says (Zephyr's default is self-powered,
+# 0xe0), and 500 mA: the board charges its battery from VBUS (TP4056) whatever
+# the firmware declares.
+CONFIG_USB_DEVICE_REMOTE_WAKEUP=y
+CONFIG_USB_SELF_POWERED=n
+CONFIG_USB_MAX_POWER=250
+
+# Key events go from the matrix scan to the keymap through a queue whose put
+# never waits (physical_layouts.c, k_msgq_put(K_NO_WAIT)); the scan and the
+# consumer share the system work queue, so a scan pass with more state changes
+# than the queue holds drops the rest, and a dropped release leaves a key held.
+# ZMK's default is 4; five keys pressed or released in one pass already exceed
+# it. 32 leaves room.
+CONFIG_ZMK_KSCAN_EVENT_QUEUE_SIZE=32
+
+# The backlight (src/led_key_matrix.c) and its effects (src/led_key_matrix_effects.c,
+# on by default with its devicetree node), not ZMK's underglow. With no
+# settings kept yet it starts on with the rainbow wave at full brightness;
+# CONFIG_BACKLIGHT_SAVE keeps the settings across a power cycle.
+
+# No switchable external power rail on this board: &ext_power would do nothing.
+CONFIG_ZMK_EXT_POWER=n
+
+# Code left out that the keyboard does not use: the rotation of the physical layout's keys (no key
+# is rotated; Studio's messages leave the zero fields out either way), time slices (no two
+# preemptible threads share a priority) and the kernel's heap (no k_heap).
+CONFIG_ZMK_PHYSICAL_LAYOUT_KEY_ROTATION=n
+CONFIG_TIMESLICING=n
+CONFIG_KERNEL_MEM_POOL=n
+
+# Identical code folding in the link, safe form: functions whose address nothing compares are
+# kept once. The units of the boot guard's early stage are compiled without the
+# address-significance table, so nothing they define or call is folded.
+CONFIG_TC32_ICF_SAFE=y
+
+# The host's keyboard LED output report (USB SET_REPORT, the BLE output report, the 2.4G
+# dongle's ACKs) kept per endpoint (ZMK's HID indicators); the report maps declare it. The
+# backlight shows Num Lock on the Num key (num-lock-pixel, cidoo_v21.dts).
+CONFIG_ZMK_HID_INDICATORS=y

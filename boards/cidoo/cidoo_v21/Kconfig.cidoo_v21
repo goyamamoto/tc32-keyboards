@@ -1,0 +1,4 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+config BOARD_CIDOO_V21
+	select SOC_TLSR8278

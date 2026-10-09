@@ -1,0 +1,189 @@
+/*
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+/*
+ * CIDOO V65 V3 keymap for the own BLE stack (TLSR_BLE), the 2.4G link (TLSR_P24), the
+ * backlight (LED_DRIVER_SPI with led_driver_table.h; the Tab key's LED blinks the US-JIS
+ * notice) and ZMK Studio over a USB serial port, with the original firmware's Windows and Mac modes as layers:
+ * Base and Fn for Windows, Mac and Mac Fn for the Mac. Fn + S (the original firmware's MAC MODE)
+ * turns the Mac layer on, Fn + A (WIN MODE) off, and the layer's state is kept over a
+ * boot (TLSR_KEPT_LAYER). The Mac layers have Alt and Cmd swapped and the right Alt a
+ * Cmd; the number row gives F1-F12 with Fn on both. Fn + Del unlocks Studio (Fn + Esc
+ * is the backtick on this 65%).
+ * US-JIS (src/usjis.c): Fn + Tab toggles it (&usjis USJIS_TOG; Studio also offers On and
+ * Off), only the Win layers substitute (CONFIG_ZMK_USJIS_LAYER_EXCLUDE_MASK). Defaults
+ * any key can be given back in Studio: Caps Lock and the left Ctrl swapped, and the keys
+ * beside Space hold their modifier and tap the IME keys (&ime_ht, hold-preferred, 200 ms):
+ * Win Alt / Muhenkan (INT5) and Alt / Henkan (INT4), Mac Cmd / Eisu (LANG2) and Cmd / Kana
+ * (LANG1).
+ * The wireless keys as on cidoo_v65v3_ble.keymap: Fn + Q/W/E the BT channels 1-3 (a tap
+ * keeps the BLE link and selects ZMK profile 0/1/2, held 3 s it also clears the profile's
+ * bond), Fn + R the 2.4G link (a tap chooses it, held 3 s in it pairs with a dongle). The
+ * keyboard has no mode switch: the cable's power decides wired or wireless. Fn + Backspace
+ * held 3 s goes back to the firmware in the other slot (&prev_fw).
+ * Layout from gen_v65v3.py (cidoo_v65v3-layouts.dtsi); the original keymap's layers 0 and 1 are the
+ * base of Base and Fn. Original knob: left = &kp C_VOL_DN, right = &kp C_VOL_UP, press = 0,14.
+ */
+
+#include <behaviors.dtsi>
+#include <dt-bindings/zmk/keys.h>
+#include <dt-bindings/zmk/bt.h>
+#include <dt-bindings/zmk/rgb.h>
+#include <dt-bindings/zmk/usjis.h>
+
+/ {
+    chosen {
+        zmk,studio-rpc-uart = &studio_rpc_usb_uart;
+    };
+};
+
+/ {
+    macros {
+        bt_sel: bt_sel {
+            compatible = "zmk,behavior-macro-one-param";
+            #binding-cells = <1>;
+            bindings = <&link_mode 1>, <&macro_param_1to2>, <&bt BT_SEL MACRO_PLACEHOLDER>;
+        };
+        bt_new: bt_new {
+            compatible = "zmk,behavior-macro-one-param";
+            #binding-cells = <1>;
+            bindings = <&link_mode 1>, <&macro_param_1to2>, <&bt BT_SEL MACRO_PLACEHOLDER>, <&bt BT_CLR>;
+        };
+    };
+
+    behaviors {
+        /* ZMK's RGB commands for the backlight (src/led_driver_spi.c with led_driver_table.h) */
+        kbl: backlight {
+            compatible = "zmk,behavior-backlight-rgb";
+            #binding-cells = <2>;
+            display-name = "Backlight";
+        };
+        /* The link kept with the profiles: 0 USB, 1 BLE, 2 the 2.4G link; running another, a reboot
+         * (USB needs the cable: without it Fn + Y is ignored). Fn + Y is USB. */
+        link_mode: link_mode {
+            compatible = "zmk,behavior-link-mode";
+            #binding-cells = <1>;
+            display-name = "Link";
+        };
+        /* Fn + R: a tap chooses the 2.4G link; held 3 s in it, pairs with a dongle */
+        p24_pair: p24_pair {
+            compatible = "zmk,behavior-p24-pair";
+            #binding-cells = <0>;
+            hold-ms = <3000>;
+            display-name = "2.4G Pair";
+        };
+        /* The status display (src/status_display.c, this board's v65v3_status.c): the battery on 1-0, the CPU left on Z-/,
+         * the profiles on Q/W/E, the 2.4G link on R, the mode on A/S; Fn + B shows it for 3 s */
+        sts: status {
+            compatible = "zmk,behavior-status-display";
+            #binding-cells = <0>;
+            display-name = "Status";
+        };
+        /* USB in the wireless links until the power goes, for the host tools (no keys over it) */
+        usb_on: usb_request {
+            compatible = "zmk,behavior-usb-request";
+            #binding-cells = <0>;
+            display-name = "USB on (wireless)";
+        };
+        usjis: usjis {
+            compatible = "zmk,behavior-usjis";
+            #binding-cells = <1>;
+            display-name = "US-JIS";
+        };
+        /* Modifier when held, IME key when tapped (the keys beside Space). hold-preferred:
+         * a key pressed while it is held makes it the modifier, so shortcuts are not delayed. */
+        ime_ht: ime_ht {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            display-name = "IME Hold-Tap";
+            flavor = "hold-preferred";
+            tapping-term-ms = <200>;
+            bindings = <&kp>, <&kp>;
+        };
+        bt_ch: bt_ch {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            display-name = "BT Channel";
+            flavor = "tap-preferred";
+            tapping-term-ms = <3000>;
+            bindings = <&bt_new>, <&bt_sel>;
+        };
+    };
+
+    keymap {
+        compatible = "zmk,keymap";
+
+        base_layer {
+            display-name = "Base";
+            bindings = <
+                &kp ESC         &kp N1          &kp N2          &kp N3          &kp N4          &kp N5          &kp N6          &kp N7          &kp N8          &kp N9          &kp N0          &kp MINUS       &kp EQUAL       &kp BSPC        &kp C_MUTE
+                &kp TAB         &kp Q           &kp W           &kp E           &kp R           &kp T           &kp Y           &kp U           &kp I           &kp O           &kp P           &kp LBKT        &kp RBKT        &kp BSLH        &kp DEL
+                &kp LCTRL       &kp A           &kp S           &kp D           &kp F           &kp G           &kp H           &kp J           &kp K           &kp L           &kp SEMI        &kp SQT         &kp RET         &kp PG_UP
+                &kp LSHFT       &kp Z           &kp X           &kp C           &kp V           &kp B           &kp N           &kp M           &kp COMMA       &kp DOT         &kp FSLH        &kp RSHFT       &kp UP          &kp PG_DN
+                &kp CAPS        &kp LGUI        &ime_ht LALT INT5 &kp SPACE     &ime_ht RALT INT4 &mo 1         &kp LEFT        &kp DOWN        &kp RIGHT
+            >;
+            sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN>;
+        };
+
+        fn_layer {
+            /* The backlight on the original firmware's keys: Fn + \ toggles, Fn + ] steps the effect, Fn + Up/Down the
+             * brightness, Fn + P / ; the colour; the original firmware's saturation and speed keys (2,11; 3,11; 5,12; 5,14)
+             * stay unbound. Original bindings left out (matrix row,col):
+             * the original firmware's own BT 1-3 / 2.4G (4,2-5: here on Fn + Q/W/E/R), DESKTOP LIGHT LOW (3,6),
+             *  LOCK WIN KEY (5,1), USB MODE (5,6: the cable's power decides) */
+            display-name = "Fn";
+            bindings = <
+                &kp GRAVE       &kp F1          &kp F2          &kp F3          &kp F4          &kp F5          &kp F6          &kp F7          &kp F8          &kp F9          &kp F10         &kp F11         &kp F12         &prev_fw        &trans
+                &usjis USJIS_TOG &bt_ch 0 0     &bt_ch 1 1      &bt_ch 2 2      &p24_pair       &trans          &link_mode 0    &usb_on         &trans          &trans          &kbl RGB_HUI    &none           &kbl RGB_EFF    &kbl RGB_TOG    &studio_unlock
+                &trans          &to 0           &to 2           &trans          &trans          &trans          &none           &trans          &trans          &trans          &kbl RGB_HUD    &none           &trans          &trans
+                &trans          &none           &none           &none           &none           &sts            &trans          &trans          &trans          &trans          &trans          &trans          &kbl RGB_BRI    &trans
+                &trans          &none           &trans          &none           &trans          &trans          &none           &kbl RGB_BRD    &none
+            >;
+            sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN>;
+        };
+
+        mac_layer {
+            /* The original firmware's Mac mode: Base with the modifiers changed; Fn holds Mac Fn */
+            display-name = "Mac";
+            bindings = <
+                &kp ESC         &kp N1          &kp N2          &kp N3          &kp N4          &kp N5          &kp N6          &kp N7          &kp N8          &kp N9          &kp N0          &kp MINUS       &kp EQUAL       &kp BSPC        &kp C_MUTE
+                &kp TAB         &kp Q           &kp W           &kp E           &kp R           &kp T           &kp Y           &kp U           &kp I           &kp O           &kp P           &kp LBKT        &kp RBKT        &kp BSLH        &kp DEL
+                &kp LCTRL       &kp A           &kp S           &kp D           &kp F           &kp G           &kp H           &kp J           &kp K           &kp L           &kp SEMI        &kp SQT         &kp RET         &kp PG_UP
+                &kp LSHFT       &kp Z           &kp X           &kp C           &kp V           &kp B           &kp N           &kp M           &kp COMMA       &kp DOT         &kp FSLH        &kp RSHFT       &kp UP          &kp PG_DN
+                &kp CAPS        &kp LALT        &ime_ht LGUI LANG2 &kp SPACE    &ime_ht RGUI LANG1 &mo 3        &kp LEFT        &kp DOWN        &kp RIGHT
+            >;
+            sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN>;
+        };
+
+        mac_fn_layer {
+            /* Fn on the Mac: as Fn */
+            display-name = "Mac Fn";
+            bindings = <
+                &kp GRAVE       &kp F1          &kp F2          &kp F3          &kp F4          &kp F5          &kp F6          &kp F7          &kp F8          &kp F9          &kp F10         &kp F11         &kp F12         &prev_fw        &trans
+                &usjis USJIS_TOG &bt_ch 0 0     &bt_ch 1 1      &bt_ch 2 2      &p24_pair       &trans          &link_mode 0    &usb_on         &trans          &trans          &kbl RGB_HUI    &none           &kbl RGB_EFF    &kbl RGB_TOG    &studio_unlock
+                &trans          &to 0           &to 2           &trans          &trans          &trans          &none           &trans          &trans          &trans          &kbl RGB_HUD    &none           &trans          &trans
+                &trans          &none           &none           &none           &none           &sts            &trans          &trans          &trans          &trans          &trans          &trans          &kbl RGB_BRI    &trans
+                &trans          &none           &trans          &none           &trans          &trans          &none           &kbl RGB_BRD    &none
+            >;
+            sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN>;
+        };
+    };
+};
+
+/* ZMK Studio's serial port */
+&usbd {
+    studio_rpc_usb_uart: studio_rpc_usb_uart {
+        compatible = "zephyr,cdc-acm-uart";
+    };
+};
+
+/* Not on these keyboards: &sys_reset only reboots (settings stay), and &bootloader has no
+ * bootloader to enter (firmware updates go through the update tool). */
+&sys_reset {
+	status = "disabled";
+};
+
+&bootloader {
+	status = "disabled";
+};

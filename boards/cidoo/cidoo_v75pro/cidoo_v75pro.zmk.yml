@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+file_format: "1"
+id: cidoo_v75pro
+name: CIDOO V75 Pro
+type: board
+arch: tc32
+url: https://cidootech.com/products/cidoo-v75
+features:
+  - keys
+  - encoder

@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+file_format: "1"
+id: cidoo_v65v3
+name: CIDOO V65 V3
+type: board
+arch: tc32
+url: https://cidootech.com/products/cidoo-v65-v3
+features:
+  - keys
+  - encoder

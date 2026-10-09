@@ -1,0 +1,112 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+if BOARD_CIDOO_V65V3
+
+config ZMK_KEYBOARD_NAME
+	default "V65 V3 ZMK"
+
+# The B87 GPIO driver (gpio_b87.c) has edge interrupts only; the matrix driver's
+# interrupt mode needs level interrupts, so scan by polling.
+config ZMK_KSCAN_MATRIX_POLLING
+	default y
+
+# Firmware updates over USB with the OTA protocol of tc32/scripts/telink_ota.py
+# (report ID 5 on a second HID interface).
+config TLSR_USB_OTA
+	default y
+
+# With BLE: the board's own pads for the deep sleep (deep_sleep_pads.c).
+config TLSR_BOARD_DEEP_SLEEP_PADS
+	default y
+
+# No mode switch: the cable's power on PD7 (the battery node) decides between
+# the wired mode and the wireless link kept with the profiles.
+config TLSR_BLE_MODE_FROM_POWER_IN
+	default y
+
+# The power-in pin read every 250 ms with power in, as the V75 Pro's switch.
+config TLSR_BLE_SWITCH_POLL_MS
+	default 250
+
+# Go back to the other slot's image after repeated watchdog resets.
+config TLSR_BOOT_GUARD
+	default y
+
+# The boot guard's early stage runs from board_early_init_hook() (board.c).
+config BOARD_EARLY_INIT_HOOK
+	default y if TLSR_BOOT_GUARD_EARLY
+
+# Fn + Up held at power-on goes back to the other image, as on the V75 Pro.
+# Not the keys of &prev_fw (Fn + Backspace held 3 s): a chord that is also a
+# running binding can do more than asked when held past the switch.
+# Held through the boot that follows, Fn + Up does nothing in ZMK's base
+# keymaps (the Fn layer has &none there); with the backlight keymap it is
+# brightness up, which the backlight behaviour ignores for the first seconds
+# after boot.
+# The two keys are on two rows and two columns, at the V75 Pro's matrix
+# positions (cidoo_v65v3-layouts.dtsi): Fn is RC(5,10), row 5 (PC0) and column
+# 10 (PD4); Up is RC(4,13), row 4 (PC1) and column 13 (PD0). Both rows have
+# their pulls in analog 0x12 (PC0-PC3), which the early stage sets to 0xff,
+# 10 kOhm pull-ups on all four; a key on row 0 or 1 (PC5, PC4) has its pull in
+# analog 0x13, which the early stage does not set. Change these with the
+# keymap.
+config TLSR_BOOT_GUARD_CHORD
+	default y
+
+config TLSR_BOOT_GUARD_CHORD_ROW
+	default 5
+
+config TLSR_BOOT_GUARD_CHORD_COL_A
+	default 10
+
+config TLSR_BOOT_GUARD_CHORD_ROW_B
+	default 4
+
+config TLSR_BOOT_GUARD_CHORD_COL_B
+	default 13
+
+# Before the first count only code a unit has run: the chord is read after
+# the count, where a hang of an unconfirmed image is counted and the boot
+# guard goes back after three boots, as on the V75 Pro, whose unit runs this
+# sequence.
+config TLSR_BOOT_GUARD_CHORD_AFTER_COUNT
+	default y
+
+config USB_HID_DEVICE_COUNT
+	default 2 if TLSR_USB_OTA
+
+config HID_INTERRUPT_EP_MPS
+	default 64 if TLSR_USB_OTA
+
+# The RAM the link may use is the devicetree's sram0, 32 KB (cidoo_v65v3.dts),
+# not the SoC's default of 64: the linker script takes its size from here.
+DT_CHOSEN_Z_SRAM := zephyr,sram
+
+config SRAM_SIZE
+	default $(dt_chosen_reg_size_int,$(DT_CHOSEN_Z_SRAM),0,K)
+
+DT_CHOSEN_Z_FLASH := zephyr,flash
+
+# The flash as the devicetree has it (512 KB, cidoo_v65v3.dts), not the SoC's 1 MB, as on the V21.
+config FLASH_SIZE
+	default $(dt_chosen_reg_size_int,$(DT_CHOSEN_Z_FLASH),0,K)
+
+# Workaround for not being able to have commas in macro arguments
+DT_CHOSEN_Z_CODE_PARTITION := zephyr,code-partition
+
+config FLASH_LOAD_OFFSET
+	default $(dt_chosen_reg_addr_hex,$(DT_CHOSEN_Z_CODE_PARTITION)) if USE_DT_CODE_PARTITION
+
+config FLASH_LOAD_SIZE
+	default $(dt_chosen_reg_size_hex,$(DT_CHOSEN_Z_CODE_PARTITION)) if USE_DT_CODE_PARTITION
+
+endif # BOARD_CIDOO_V65V3
+
+# P-256 for Secure Connections on the public key engine (the pke node).
+if TC32_P256
+
+choice TC32_P256_IMPL
+	default TC32_P256_PKE
+endchoice
+
+endif # TC32_P256

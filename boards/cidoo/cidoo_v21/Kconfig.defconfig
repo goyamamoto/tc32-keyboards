@@ -1,0 +1,81 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+if BOARD_CIDOO_V21
+
+config ZMK_KEYBOARD_NAME
+	default "V21 ZMK"
+
+# Firmware updates over USB with the OTA protocol of tc32/scripts/telink_ota.py
+# (report ID 5 on a second HID interface).
+config TLSR_USB_OTA
+	default y
+
+# Go back to the other slot's image after repeated watchdog resets.
+config TLSR_BOOT_GUARD
+	default y
+
+# The boot guard's early stage runs from board_early_init_hook() (board.c).
+config BOARD_EARLY_INIT_HOOK
+	default y if TLSR_BOOT_GUARD_EARLY
+
+# Fn + KP- held at power-on goes back to the other image. Not the keys of
+# &prev_fw (Fn + KP0 held 15 s): a chord that is also a running binding can do
+# more than asked when held past the switch (the original firmware's Fn + 0 held
+# 3 s is its factory reset; with ZMK in the other slot, &prev_fw switches back
+# again). Held through the boot that follows, Fn + KP- only dims the backlight
+# one step (&bl RGB_BRD on the Fn layer; the keyboard's original key assignment does the same
+# there). The
+# two keys are on two rows and two columns: Fn is RC(0,1), row 0 (PC2) and
+# column 1 (PB5); KP- is RC(1,3), row 1 (PC1) and column 3 (PC0). Change these
+# with the keymap.
+config TLSR_BOOT_GUARD_CHORD
+	default y
+
+config TLSR_BOOT_GUARD_CHORD_ROW
+	default 0
+
+config TLSR_BOOT_GUARD_CHORD_COL_A
+	default 1
+
+config TLSR_BOOT_GUARD_CHORD_ROW_B
+	default 1
+
+config TLSR_BOOT_GUARD_CHORD_COL_B
+	default 3
+
+config USB_HID_DEVICE_COUNT
+	default 2 if TLSR_USB_OTA
+
+config HID_INTERRUPT_EP_MPS
+	default 64 if TLSR_USB_OTA
+
+# Workaround for not being able to have commas in macro arguments
+DT_CHOSEN_Z_CODE_PARTITION := zephyr,code-partition
+DT_CHOSEN_Z_SRAM := zephyr,sram
+DT_CHOSEN_Z_FLASH := zephyr,flash
+
+# The linker's RAM region comes from SRAM_SIZE, not from the devicetree: take
+# it from sram0 (32 KB, cidoo_v21.dts), not the SoC's 64.
+config SRAM_SIZE
+	default $(dt_chosen_reg_size_int,$(DT_CHOSEN_Z_SRAM),0,K)
+
+# The flash as the devicetree has it (512 KB, cidoo_v21.dts), not the SoC's 1 MB.
+config FLASH_SIZE
+	default $(dt_chosen_reg_size_int,$(DT_CHOSEN_Z_FLASH),0,K)
+
+config FLASH_LOAD_OFFSET
+	default $(dt_chosen_reg_addr_hex,$(DT_CHOSEN_Z_CODE_PARTITION)) if USE_DT_CODE_PARTITION
+
+config FLASH_LOAD_SIZE
+	default $(dt_chosen_reg_size_hex,$(DT_CHOSEN_Z_CODE_PARTITION)) if USE_DT_CODE_PARTITION
+
+endif # BOARD_CIDOO_V21
+
+# P-256 for Secure Connections on the public key engine (the pke node).
+if TC32_P256
+
+choice TC32_P256_IMPL
+	default TC32_P256_PKE
+endchoice
+
+endif # TC32_P256
