@@ -44,16 +44,19 @@ What the firmware gives on each of them:
 
 ## Build
 
-The build runs on macOS or Linux with [west](https://docs.zephyrproject.org/latest/develop/west/index.html), CMake, Ninja, Python 3 and clang and lld from [llvm-tc32](https://github.com/goyamamoto/llvm-tc32) (branch `tc32/23.1.2`, built as below), plus [tc32-devtools](https://github.com/goyamamoto/tc32-devtools). The workspace:
+The build runs on macOS or Linux with git, Python 3, CMake, Ninja, the devicetree compiler (`dtc`), and clang and lld from [llvm-tc32](https://github.com/goyamamoto/llvm-tc32) (built as below), plus [tc32-devtools](https://github.com/goyamamoto/tc32-devtools). West and the Python packages go into a virtual environment in the workspace, `.venv-zephyr`, which `build.sh` uses. The workspace for release v0.1.0:
 
 ```sh
+mkdir <workspace> && cd <workspace>
+python3 -m venv .venv-zephyr && . .venv-zephyr/bin/activate
 pip install west
-west init -m https://github.com/goyamamoto/tc32-keyboards <workspace>
-cd <workspace> && west update          # tc32-keyboards/, zmk/, zephyr/, modules/lib/nanopb, modules/zmk-studio-messages
-python3 -m venv .venv-zephyr && .venv-zephyr/bin/pip install -r zephyr/scripts/requirements-base.txt protobuf grpcio-tools
+west init -m https://github.com/goyamamoto/tc32-keyboards --mr v0.1.0 .
+west update --narrow -o=--depth=1      # tc32-keyboards/, zmk/, zephyr/, modules/lib/nanopb, modules/zmk-studio-messages
+pip install -r zephyr/scripts/requirements-base.txt protobuf grpcio-tools
 git clone https://github.com/goyamamoto/tc32-devtools ../tc32-devtools   # or TC32_DEVTOOLS=<path>
 git -C ../tc32-devtools checkout 2e1bcaed762e3124b024047db981172d2b0395ba   # the commit RELEASE-NOTES.md names
-git clone --depth 1 --branch tc32/23.1.2 https://github.com/goyamamoto/llvm-tc32 ../llvm-tc32
+git init ../llvm-tc32 && git -C ../llvm-tc32 fetch --depth 1 https://github.com/goyamamoto/llvm-tc32 27606ee65ffaa0f41a9a8beaabee654325732b62
+git -C ../llvm-tc32 checkout FETCH_HEAD                                   # the llvm-tc32 commit RELEASE-NOTES.md names
 cmake -G Ninja -S ../llvm-tc32/llvm -B ../llvm-tc32-build \
   -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_ASSERTIONS=OFF \
   -DLLVM_ENABLE_PROJECTS="clang;lld" -DLLVM_TARGETS_TO_BUILD=ARM \
@@ -63,8 +66,10 @@ cmake -G Ninja -S ../llvm-tc32/llvm -B ../llvm-tc32-build \
   -DCMAKE_INSTALL_PREFIX=<prefix> \
   -DLLVM_DISTRIBUTION_COMPONENTS="clang;clang-resource-headers;lld;llvm-ar;llvm-ranlib;llvm-nm;llvm-objcopy;llvm-strip;llvm-objdump;llvm-readobj;llvm-readelf;llvm-size;llvm-symbolizer;llvm-addr2line"
 ninja -C ../llvm-tc32-build install-distribution
-mkdir -p toolchains && ln -s <prefix> toolchains/thumb-llvm
+mkdir -p toolchains && ln -s <prefix> toolchains/thumb-llvm         # <prefix> as an absolute path
 ```
+
+`--mr v0.1.0` takes the release; without it, `west init` takes `main`. `west update` without `--narrow -o=--depth=1` fetches the full histories (zephyr-tc32's is large).
 
 llvm-tc32 is LLVM 23.1.2 with the changes for the TC32 (zmk-tc32's [TC32.md](https://github.com/goyamamoto/zmk-tc32/blob/main/TC32.md) describes the toolchains). A mainstream clang stops the build with a message; with `CONFIG_TC32_POP_PC_RETURNS=n` in a Kconfig fragment (`EXTRA_CONF=<file.conf> ./build.sh ...`) it builds the images, which are then about 4-5 KB larger.
 

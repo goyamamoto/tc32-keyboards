@@ -77,7 +77,7 @@ Per board:
 
 ## Requirements
 
-- Computer: Python 3 and the `hid` package (`python3 -m pip install hid`). It needs the hidapi library: on macOS `brew install hidapi`, on Linux the distribution's `libhidapi` package.
+- Computer: Python 3 and the `hid` package. Where the system's Python refuses packages (Homebrew's Python on macOS: "externally-managed-environment"), a virtual environment holds it: `python3 -m venv ~/.venv-hid && ~/.venv-hid/bin/pip install hid`, and the commands below then use `~/.venv-hid/bin/python3` for `python3`; elsewhere `python3 -m pip install hid`. It needs the hidapi library: on macOS `brew install hidapi`, on Linux the distribution's `libhidapi` package.
   - On macOS the terminal application needs Input Monitoring (System Settings > Privacy & Security > Input Monitoring); without it, the tool cannot open the keyboard's interface.
   - On Linux, access to the HID device usually needs root or a udev rule for 320F:5055 and 1D50:615E.
 - Keyboard:
