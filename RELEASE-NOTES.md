@@ -18,7 +18,15 @@ Built from zmk-tc32 d2bdf11b0554347f64f609f7c04bf24eb30d55c1 (upstream ZMK main 
 
 The release on GitHub holds one zip per board (`cidoo_v75pro.zip`, `cidoo_v65v3.zip`, `cidoo_v21.zip`), each with the board's `zmk.ota.bin` above and the tool `telink_ota.py` of zmk-tc32 d2bdf11b, as [INSTALL.md](INSTALL.md) expects them in one folder. `DIRECT=1 ./build.sh BOARD` gives the same bytes. Every image passes the build's checks.
 
-On hardware: a V21 ran an earlier build, image 75b6dc83 (zephyr-tc32 0725dd2ffda, zmk-tc32 d5ebd26c, tc32-keyboards 5567225): the install through the original firmware's updater and the ways back, typing over USB, over Bluetooth (a Mac, an iPhone and an Android phone) and over the 2.4G dongle, the Num Lock LED, and ZMK Studio. The fixes made after that image have not run on hardware yet (tested in an emulator only). The V75 Pro and V65 V3 images have not run on hardware yet (tested in an emulator only).
+On hardware: a V21 ran an earlier build, image 75b6dc83 (zephyr-tc32 0725dd2ffda, zmk-tc32 d5ebd26c, tc32-keyboards 5567225): the install through the original firmware's updater and the ways back, typing over USB, over Bluetooth (a Mac, an iPhone and an Android phone) and over the 2.4G dongle, the Num Lock LED, and ZMK Studio. The fixes made after that image have not run on hardware yet (tested in an emulator only).
+
+The V75 Pro and V65 V3 images above ran on one keyboard each:
+- the install through the original firmware's updater;
+- the power-on chord back to the original firmware before the confirm, then the confirm;
+- typing over USB;
+- typing over Bluetooth on a Mac: Passkey Entry pairing, and the reconnect with the stored bond after a power-off.
+
+The V75 Pro also typed over the 2.4G dongle. The V65 V3's 2.4G link has not run on hardware (tested in an emulator only).
 
 A Bluetooth bond made by legacy pairing (by earlier builds) is not used: the host pairs again.
 

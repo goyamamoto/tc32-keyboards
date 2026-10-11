@@ -60,10 +60,10 @@ config TLSR_BOOT_GUARD_CHORD_COL_B
 	default 13
 
 # The V75 Pro is a keyboard in daily use and must not be left unbootable:
-# before the first count only code a unit has run. The chord's active-low
-# reading of these pins has not run on hardware (the V21's is active-high), so
-# it is read after the count, where a hang of an unconfirmed image is counted
-# and the boot guard goes back after three boots.
+# before the first count only code a unit has run. The chord (active-low on
+# these pins; the V21's is active-high) is read after the count, where a hang
+# of an unconfirmed image is counted and the boot guard goes back after three
+# boots.
 config TLSR_BOOT_GUARD_CHORD_AFTER_COUNT
 	default y
 

@@ -36,7 +36,22 @@ What the firmware gives on each of them:
 ### What has run on hardware
 
 - V21: an earlier build, image `75b6dc83`, ran on one keyboard: the install through the original firmware's updater and the ways back to the original firmware, typing over USB, over Bluetooth (a Mac, an iPhone and an Android phone) and over the 2.4G dongle, the Num Lock LED, and ZMK Studio. The fixes made after that image have not run on hardware yet (tested in an emulator only).
-- V75 Pro and V65 V3: the images above have not run on hardware yet (tested in an emulator only). Earlier builds for these two boards, with legacy Bluetooth pairing, were installed through the same updater and taken back to the original firmware on one keyboard each.
+- V75 Pro: the image above, `6b1c84ae`, ran on one keyboard:
+  - the install through the original firmware's updater;
+  - the power-on chord back to the original firmware before the confirm;
+  - the confirm;
+  - typing over USB;
+  - typing over Bluetooth on a Mac: Passkey Entry pairing, and the reconnect with the stored bond after a power-off;
+  - typing over the 2.4G dongle.
+- V65 V3: the image above, `ab20dc6c`, ran on one keyboard:
+  - the install through the original firmware's updater;
+  - the power-on chord back to the original firmware before the confirm;
+  - the confirm;
+  - typing over USB;
+  - typing over Bluetooth on a Mac: Passkey Entry pairing, the reconnect with the stored bond after a power-off, and the cable taken out and put back in;
+  - Fn + Y back to USB.
+
+  Its 2.4G link has not run on hardware (tested in an emulator only).
 
 ## Install
 
