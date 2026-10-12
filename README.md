@@ -123,3 +123,11 @@ For that, the people who use a keyboard need four rights:
 - **Longevity**: to fix it, also when its maker no longer does.
 
 Source code is what makes these rights real. So the firmware (zmk-tc32, tc32-keyboards) is licensed under the GNU General Public License, version 3 or later. We welcome makers who build better keyboards with this work, and we ask them to develop in the open, so that the people who buy those keyboards keep these rights.
+
+## Use of AI
+
+This repository is the work of a human, with the assistance of AI (Anthropic's Claude through Claude Code; OpenAI's GPT-6 Astra through Codex). The author set the goals, the constraints and the order of the work, examined the results and wrote or rewrote parts of the code.
+
+The software runs on the keyboards for which it was made, and we use it daily. It was tested and reviewed until we were satisfied. This is not a claim that the code is free of errors; errors are corrected as they are found. Such is the ordinary standard for software, free software included, and it is the standard applied here.
+
+We hold that the value of software lies in what it does for those who use it, not in who or what wrote it. Two programs that serve their users equally are of equal worth, whether written with AI or without.
